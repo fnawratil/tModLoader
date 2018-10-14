@@ -11,11 +11,12 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
-using ExampleMod.UI;
 using Terraria.UI;
 using Terraria.DataStructures;
 using Terraria.GameContent.UI;
 using System;
+using ExampleMod.UI_Examples;
+using ExampleMod.UI_Examples.CoinUI;
 
 namespace ExampleMod
 {
@@ -28,7 +29,7 @@ namespace ExampleMod
 		public static Effect exampleEffect;
 		private UserInterface exampleUserInterface;
 		internal UserInterface examplePersonUserInterface;
-		internal ExampleUI exampleUI;
+		internal CoinUI CoinUI;
 		public static ModHotKey RandomBuffHotKey;
 		public static int FaceCustomCurrencyID;
 
@@ -110,10 +111,10 @@ namespace ExampleMod
 				GameShaders.Misc["ExampleMod:DeathAnimation"] = new MiscShaderData(new Ref<Effect>(GetEffect("Effects/ExampleEffectDeath")), "DeathAnimation").UseImage("Images/Misc/Perlin");
 
 				// Custom UI
-				exampleUI = new ExampleUI();
-				exampleUI.Activate();
+				CoinUI = new CoinUI();
+				CoinUI.Activate();
 				exampleUserInterface = new UserInterface();
-				exampleUserInterface.SetState(exampleUI);
+				exampleUserInterface.SetState(CoinUI);
 
 				// UserInterface can only show 1 UIState at a time. If you want different "pages" for a UI, switch between UIStates on the same UserInterface instance. 
 				// We want both the Coin counter and the Example Person UI to be independent and coexist simultaneously, so we have them each in their own UserInterface.
@@ -237,14 +238,14 @@ namespace ExampleMod
 			}
 		}
 
-		const int ShakeLength = 5;
-		int ShakeCount = 0;
-		float previousRotation = 0;
-		float targetRotation = 0;
-		float previousOffsetX = 0;
-		float previousOffsetY = 0;
-		float targetOffsetX = 0;
-		float targetOffsetY = 0;
+		//const int ShakeLength = 5;
+		//int ShakeCount = 0;
+		//float previousRotation = 0;
+		//float targetRotation = 0;
+		//float previousOffsetX = 0;
+		//float previousOffsetY = 0;
+		//float targetOffsetX = 0;
+		//float targetOffsetY = 0;
 
 		// Volcano Tremor
 		/* To be fixed later.
@@ -298,7 +299,7 @@ namespace ExampleMod
 
 		public override void UpdateUI(GameTime gameTime)
 		{
-			if (exampleUserInterface != null && ExampleUI.visible)
+			if (exampleUserInterface != null && CoinUI.Visible)
 				exampleUserInterface.Update(gameTime);
 			if (examplePersonUserInterface != null)
 				examplePersonUserInterface.Update(gameTime);
@@ -313,7 +314,7 @@ namespace ExampleMod
 					"ExampleMod: Coins Per Minute",
 					delegate
 					{
-						if (ExampleUI.visible)
+						if (CoinUI.Visible)
 						{
 							exampleUserInterface.Draw(Main.spriteBatch, new GameTime());
 						}

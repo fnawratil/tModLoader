@@ -1,9 +1,10 @@
-author = blushiemagic, jopojelly, Jofairden
+author = blushiemagic, jopojelly, Jofairden, Chicken-Bones
 version = 0.10.1.5
 displayName = Example Mod
-homepage = http://forums.terraria.org/index.php?threads/1-3-tmodloader-a-modding-api.23726/
+homepage = http://forums.terraria.org/index.php?threads/.23726/
 hideCode = false
 hideResources = false
 includeSource = true
 buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*
 includePDB = true
+languageVersion = 6

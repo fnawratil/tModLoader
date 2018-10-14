@@ -34,6 +34,9 @@
     <RootNamespace>ExampleMod</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\references\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553" />
@@ -48,8 +51,8 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Terraria">
-      <HintPath>..\src\tModLoader\bin\x86\WindowsDebug\Terraria.exe</HintPath>
+    <Reference Include="tModLoaderDebug">
+      <HintPath>..\..\..\..\..\Apps\Steam\steamapps\common\Terraria\tModLoaderDebug.exe</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -274,11 +277,14 @@
     <Compile Include="Tiles\TEScoreBoard.cs" />
     <Compile Include="Tiles\VoidMonolith.cs" />
     <Compile Include="Tiles\VoidSky.cs" />
-    <Compile Include="UI\DragableUIPanel.cs" />
-    <Compile Include="UI\ExamplePersonUI.cs" />
-    <Compile Include="UI\ExampleUI.cs" />
-    <Compile Include="UI\UIHoverImageButton.cs" />
-    <Compile Include="UI\VanillaItemSlotWrapper.cs" />
+    <Compile Include="UI_Examples\CoinUI\MoneyCounterGlobalItem.cs" />
+    <Compile Include="UI_Examples\CoinUI\UIMoneyDisplay.cs" />
+    <Compile Include="UI_Examples\Inheritance\DraggableUIPanel.cs" />
+    <Compile Include="UI_Examples\CustomReforgeSlot\ExamplePersonUI.cs" />
+    <Compile Include="UI_Examples\CoinUI\CoinUI.cs" />
+    <Compile Include="UI_Examples\Inheritance\UIHoverImageButton.cs" />
+    <Compile Include="UI_Examples\UIState_Explained.cs" />
+    <Compile Include="UI_Examples\CustomItemSlot\VanillaItemSlotWrapper.cs" />
     <Compile Include="Walls\ExampleWall.cs" />
     <Compile Include="Waters\ExampleWaterfallStyle.cs" />
     <Compile Include="Waters\ExampleWaterStyle.cs" />

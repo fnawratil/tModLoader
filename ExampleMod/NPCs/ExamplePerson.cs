@@ -1,4 +1,6 @@
 using System.Linq;
+using ExampleMod.UI_Examples;
+using ExampleMod.UI_Examples.CustomReforgeSlot;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -198,7 +200,7 @@ namespace ExampleMod.NPCs
 				// remove the chat window...
 				Main.npcChatText = "";
 				// and start an instance of our UIState.
-				ExampleMod.instance.examplePersonUserInterface.SetState(new UI.ExamplePersonUI());
+				ExampleMod.instance.examplePersonUserInterface.SetState(new ExamplePersonUI());
 				// Note that even though we remove the chat window, Main.LocalPlayer.talkNPC will still be set correctly and we are still technically chatting with the npc.
 			}
 		}
