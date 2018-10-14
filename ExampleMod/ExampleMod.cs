@@ -15,6 +15,7 @@ using Terraria.UI;
 using Terraria.DataStructures;
 using Terraria.GameContent.UI;
 using System;
+using ExampleMod.Recipe_Examples;
 using ExampleMod.UI_Examples;
 using ExampleMod.UI_Examples.CoinUI;
 
@@ -172,15 +173,7 @@ namespace ExampleMod
 
 		public override void AddRecipeGroups()
 		{
-			// Creates a new recipe group
-			RecipeGroup group = new RecipeGroup(() => Language.GetTextValue("LegacyMisc.37") + " " + Lang.GetItemNameValue(ItemType("ExampleItem")), new int[]
-			{
-				ItemType("ExampleItem"),
-				ItemType("EquipMaterial"),
-				ItemType("BossItem")
-			});
-			// Registers the new recipe group with the specified name
-			RecipeGroup.RegisterGroup("ExampleMod:ExampleItem", group);
+			new Example_RecipeGroups().AddExampleRecipeGroup(this);
 		}
 
 		// Learn how to do Recipes: https://github.com/blushiemagic/tModLoader/wiki/Basic-Recipes 
@@ -191,11 +184,14 @@ namespace ExampleMod
 			recipe.AddIngredient(null, "ExampleItem");
 			recipe.SetResult(ItemID.Wood, 999);
 			recipe.AddRecipe();
+			// PLEASE NOTE: ModItem has its own AddRecipes() hook, it is recommended to add a recipe for the item there and not here!
 
-			// To make ExampleMod more organized, the rest of the recipes are added elsewhere, see the method calls below.
-			// See RecipeHelper.cs
-			RecipeHelper.AddExampleRecipes(this);
-			RecipeHelper.ExampleRecipeEditing(this);
+			// To keep your Mod class tidy, it is recommended to place recipes elsewhere
+			new Recipe_Editing().ExampleRecipeEditing(this);
+			new Recipes_Explained(this).AddExampleRecipes();
+			// As shown above, we do not store the classes in variables.
+			// This is because we don't need them later.
+			// An alternative is making static classes
 		}
 
 		public override void UpdateMusic(ref int music, ref MusicPriority priority)

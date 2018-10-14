@@ -7,8 +7,8 @@ namespace ExampleMod.UI_Examples.CoinUI
 	public class MoneyCounterGlobalItem : GlobalItem
 	{
 		// We can cast mod to ExampleMod or just utilize ExampleMod.instance.
-		// (mod as ExampleMod).exampleUI.updateValue(item.stack);
-		// The example of using the instance is that you can make this helper static
+		// (mod as ExampleMod).CoinUI.UpdateValue(item.stack);
+		// The benefit of using the instance is that you can make this helper static
 		// which means it only lives in one location and not each instanced GlobalItem
 		private static CoinUI _coinUI => ExampleMod.instance.CoinUI;
 
@@ -18,7 +18,6 @@ namespace ExampleMod.UI_Examples.CoinUI
 			{
 				case ItemID.CopperCoin:
 					_coinUI?.UpdateValue(item.stack);
-					
 					break;
 				case ItemID.SilverCoin:
 					_coinUI?.UpdateValue(item.stack * 100);

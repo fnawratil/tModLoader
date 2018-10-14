@@ -51,8 +51,8 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="tModLoaderDebug">
-      <HintPath>..\..\..\..\..\Apps\Steam\steamapps\common\Terraria\tModLoaderDebug.exe</HintPath>
+    <Reference Include="Terraria">
+      <HintPath>..\src\tModLoader\bin\x86\WindowsDebug\Terraria.exe</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -246,7 +246,11 @@
     <Compile Include="Projectiles\ShadowArm.cs" />
     <Compile Include="Projectiles\SparklingBall.cs" />
     <Compile Include="Projectiles\Wisp.cs" />
-    <Compile Include="RecipeHelper.cs" />
+    <Compile Include="Recipe_Examples\Example_RecipeGroups.cs" />
+    <Compile Include="Recipe_Examples\Recipes_Explained.cs" />
+    <Compile Include="Recipe_Examples\Inheritance\AdditionalIngredientFinder.cs" />
+    <Compile Include="Recipe_Examples\Inheritance\ChainFinder.cs" />
+    <Compile Include="Recipe_Examples\Recipe_Editing.cs" />
     <Compile Include="SimpleModPlayer.cs" />
     <Compile Include="Sounds\Custom\WatchOut.cs" />
     <Compile Include="Sounds\Item\Wooo.cs" />
