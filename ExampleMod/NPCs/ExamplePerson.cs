@@ -1,3 +1,4 @@
+using ExampleMod.ModPlayer_Examples;
 using ExampleMod.UI_Examples.CustomReforgeSlot;
 using Terraria;
 using Terraria.ID;

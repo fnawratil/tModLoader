@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria.UI;
 using Terraria.GameContent.UI;
 using System;
+using ExampleMod.ModPlayer_Examples;
 using ExampleMod.Recipe_Examples;
 using ExampleMod.UI_Examples.CoinUI;
 

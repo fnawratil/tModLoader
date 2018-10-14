@@ -1,3 +1,4 @@
+using ExampleMod.ModPlayer_Examples;
 using Terraria;
 using Terraria.ModLoader;
 using ExampleMod.NPCs;

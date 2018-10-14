@@ -96,7 +96,7 @@
     <Compile Include="Recipe_Examples\Inheritance\ExampleAdvancedRecipe.cs" />
     <Compile Include="ExampleCustomCurrency.cs" />
     <Compile Include="ExampleMod.cs" />
-    <Compile Include="ExamplePlayer.cs" />
+    <Compile Include="ModPlayer_Examples\ExamplePlayer.cs" />
     <Compile Include="ExampleWorld.cs" />
     <Compile Include="Gores\ExampleDroplet.cs" />
     <Compile Include="Gores\ExampleTreeFX.cs" />
@@ -251,7 +251,7 @@
     <Compile Include="Recipe_Examples\Inheritance\AdditionalIngredientFinder.cs" />
     <Compile Include="Recipe_Examples\Inheritance\ChainFinder.cs" />
     <Compile Include="Recipe_Examples\Recipe_Editing.cs" />
-    <Compile Include="SimpleModPlayer.cs" />
+    <Compile Include="ModPlayer_Examples\SimpleModPlayer.cs" />
     <Compile Include="Sounds\Custom\WatchOut.cs" />
     <Compile Include="Sounds\Item\Wooo.cs" />
     <Compile Include="Tiles\AnimatedLoom.cs" />

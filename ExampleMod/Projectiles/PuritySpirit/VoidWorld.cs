@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using ExampleMod.ModPlayer_Examples;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;

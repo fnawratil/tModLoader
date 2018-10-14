@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using ExampleMod.NPCs.PuritySpirit;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.ModLoader;
-using ExampleMod.NPCs.PuritySpirit;
 using Terraria.ModLoader.IO;
-using Terraria.GameInput;
 
-namespace ExampleMod
+namespace ExampleMod.ModPlayer_Examples
 {
+	//@todo clean up
 	// ModPlayer classes provide a way to attach data to Players and act on that data. ExamplePlayer has a lot of functionality related to 
 	// several effects and items in ExampleMod. See SimpleModPlayer for a very simple example of how ModPlayer classes work.
 	public class ExamplePlayer : ModPlayer
@@ -377,7 +378,7 @@ namespace ExampleMod
 			for (int n = 13; n < 18 + player.extraAccessorySlots; n++)
 			{
 				Item item = player.armor[n];
-				if (item.type == mod.ItemType<Items.Armor.ExampleCostume>())
+				if (item.type == mod.ItemType<global::ExampleMod.Items.Armor.ExampleCostume>())
 				{
 					blockyHideVanity = false;
 					blockyForceVanity = true;
