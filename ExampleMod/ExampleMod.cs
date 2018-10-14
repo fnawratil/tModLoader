@@ -10,13 +10,10 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Graphics;
 using Terraria.UI;
-using Terraria.DataStructures;
 using Terraria.GameContent.UI;
 using System;
 using ExampleMod.Recipe_Examples;
-using ExampleMod.UI_Examples;
 using ExampleMod.UI_Examples.CoinUI;
 
 namespace ExampleMod

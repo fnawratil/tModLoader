@@ -1,11 +1,8 @@
-using System.Linq;
-using ExampleMod.UI_Examples;
 using ExampleMod.UI_Examples.CustomReforgeSlot;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.Utilities;
 
 namespace ExampleMod.NPCs
 {

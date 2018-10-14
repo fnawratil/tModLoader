@@ -1,5 +1,4 @@
-﻿using System;
-using ExampleMod.Projectiles;
+﻿using ExampleMod.Projectiles;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;

@@ -1,5 +1,4 @@
-﻿using ExampleMod.UI_Examples;
-using ExampleMod.UI_Examples.CoinUI;
+﻿using ExampleMod.UI_Examples.CoinUI;
 using Terraria.ModLoader;
 
 namespace ExampleMod.Commands

@@ -7,7 +7,6 @@ using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.Utilities;
 using ExampleMod.Projectiles.PuritySpirit;
 
 namespace ExampleMod.NPCs.PuritySpirit
