@@ -185,8 +185,8 @@ namespace ExampleMod
 			// PLEASE NOTE: ModItem has its own AddRecipes() hook, it is recommended to add a recipe for the item there and not here!
 
 			// To keep your Mod class tidy, it is recommended to place recipes elsewhere
-			new Recipe_Editing().ExampleRecipeEditing(this);
-			new Recipes_Explained(this).AddExampleRecipes();
+			new Recipe_Finding_And_Editing(this).Example_Recipe_Finding_And_Editing();
+			new Recipes_Explained(this).Example_Recipes();
 			// As shown above, we do not store the classes in variables.
 			// This is because we don't need them later.
 			// An alternative is making static classes

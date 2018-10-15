@@ -247,10 +247,11 @@
     <Compile Include="Projectiles\SparklingBall.cs" />
     <Compile Include="Projectiles\Wisp.cs" />
     <Compile Include="Recipe_Examples\Example_RecipeGroups.cs" />
+    <Compile Include="Recipe_Examples\Inheritance\RequiresNpcRecipe.cs" />
     <Compile Include="Recipe_Examples\Recipes_Explained.cs" />
     <Compile Include="Recipe_Examples\Inheritance\AdditionalIngredientFinder.cs" />
     <Compile Include="Recipe_Examples\Inheritance\ChainFinder.cs" />
-    <Compile Include="Recipe_Examples\Recipe_Editing.cs" />
+    <Compile Include="Recipe_Examples\Recipe_Finding_And_Editing.cs" />
     <Compile Include="ModPlayer_Examples\SimpleModPlayer.cs" />
     <Compile Include="Sounds\Custom\WatchOut.cs" />
     <Compile Include="Sounds\Item\Wooo.cs" />

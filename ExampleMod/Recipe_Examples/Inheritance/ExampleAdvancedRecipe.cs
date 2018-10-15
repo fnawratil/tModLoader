@@ -8,6 +8,7 @@ namespace ExampleMod.Recipe_Examples.Inheritance
 	// ModRecipe class is useful class that can help us adding custom recipe requirements other than materials
 	// In this example my recipe will need specific npc nearby and Eye of Cthulhu defeated
 	// For use of this see the class below
+	// Note: see RequiresNpcRecipe.cs to learn more about abstraction
 	public class ExampleAdvancedRecipe : ModRecipe
 	{
 		private readonly int _neededNpcType;
