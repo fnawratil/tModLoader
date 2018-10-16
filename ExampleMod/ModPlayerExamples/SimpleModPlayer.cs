@@ -2,7 +2,7 @@
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace ExampleMod.ModPlayer_Examples
+namespace ExampleMod.ModPlayerExamples
 {
 	// This file shows the very basics of using ModPlayer classes since ExamplePlayer can be a bit overwhelming.
 	// ModPlayer classes provide a way to attach data to Players and act on that data. 
@@ -24,7 +24,7 @@ namespace ExampleMod.ModPlayer_Examples
 
 	// This is the ModPlayer class.
 	// Make note of the classname, which is SimpleModPlayer, since we will be using this in the accessory item below.
-	class SimpleModPlayer : ModPlayer
+	public class SimpleModPlayer : ModPlayer
 	{
 		// Here we declare the frostBurnSummon variable which will represent whether this player has the effect or not.
 		public bool FrostBurnSummon;
@@ -48,7 +48,8 @@ namespace ExampleMod.ModPlayer_Examples
 			if ((proj.minion || ProjectileID.Sets.MinionShot[proj.type]) && FrostBurnSummon && !proj.noEnchantments)
 			{
 				// If all those checks pass, we apply FrostBurn for some random duration.
-				target.AddBuff(BuffID.Frostburn, 60 * Main.rand.Next(5, 15), false);
+				target.AddBuff(BuffID.Frostburn, 60 * Main.rand.Next(5, 15));
+				// We multiply duration by 60 because each second lasts 60 update cycles
 			}
 		}
 
@@ -62,7 +63,7 @@ namespace ExampleMod.ModPlayer_Examples
 	{
 		// Assigning multiple EquipType/Animation textures is easily done.
 		[AutoloadEquip(EquipType.Neck, EquipType.Balloon)]
-		class SimpleAccessory : ModItem
+		public class SimpleAccessory : ModItem
 		{
 			public override void SetDefaults()
 			{

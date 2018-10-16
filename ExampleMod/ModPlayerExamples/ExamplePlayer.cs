@@ -11,9 +11,18 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace ExampleMod.ModPlayer_Examples
+namespace ExampleMod.ModPlayerExamples
 {
-	//@todo clean up
+	//========================
+	//======= WARNING! =======
+	//========================
+	// This class showcases HOW NOT TO approach a ModPlayer class
+	// That you want your ModPlayer to hold multiple functionalities 
+	// is fine, but this is no Object-Oriented approach and everything
+	// has become scattered across the file. What you SHOULD do is have
+	// objects live on your ModPlayer, designed in a flexible way, containing
+	// the implementation of functionalities you want your ModPlayer to provide
+
 	// ModPlayer classes provide a way to attach data to Players and act on that data. ExamplePlayer has a lot of functionality related to 
 	// several effects and items in ExampleMod. See SimpleModPlayer for a very simple example of how ModPlayer classes work.
 	public class ExamplePlayer : ModPlayer

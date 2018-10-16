@@ -2,12 +2,22 @@
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace ExampleMod.Recipe_Examples
+namespace ExampleMod.RecipeExamples
 {
-	public class Example_RecipeGroups
+	public static class RecipeGroups
 	{
-		public void AddExampleRecipeGroup(Mod mod)
+		// ==========================================
+		// ======== BASIC RECIPE GROUP BELOW ========
+		// ==========================================
+		// This section shows how to make a custom recipe group, using RecipeGroup
+		// A group is what allows multiple items to be used as an ingredient in place of one another
+		// So if a group consists of a, b and c, a player only needs one of a, b or c to craft the item
+
+		public static void AddRecipeGroups()
 		{
+			// Make it easier to access our mod in static context
+			Mod mod = ExampleMod.instance;
+
 			// Creates a new recipe group
 			RecipeGroup group = new RecipeGroup(() => 
 
@@ -29,6 +39,7 @@ namespace ExampleMod.Recipe_Examples
 			RecipeGroup.RegisterGroup("ExampleMod:ExampleItem", group);
 			// You or other modders can add this group to their recipe by this name:
 			//recipe.AddRecipeGroup("ExampleMod:ExampleItem");
+			// It is recommended to prefix the name with your internal mod name followed by :
 		}
 	}
 }

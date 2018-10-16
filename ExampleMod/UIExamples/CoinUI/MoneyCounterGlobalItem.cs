@@ -2,7 +2,7 @@
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace ExampleMod.UI_Examples.CoinUI
+namespace ExampleMod.UIExamples.CoinUI
 {
 	public class MoneyCounterGlobalItem : GlobalItem
 	{

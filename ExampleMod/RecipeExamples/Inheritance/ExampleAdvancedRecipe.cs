@@ -3,12 +3,15 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace ExampleMod.Recipe_Examples.Inheritance
+namespace ExampleMod.RecipeExamples.Inheritance
 {
 	// ModRecipe class is useful class that can help us adding custom recipe requirements other than materials
 	// In this example my recipe will need specific npc nearby and Eye of Cthulhu defeated
 	// For use of this see the class below
+
 	// Note: see RequiresNpcRecipe.cs to learn more about abstraction
+	// Using RequiresNpcRecipe here is actually the BETTER approach, to learn
+	// we leave adapting this class to do that to you.
 	public class ExampleAdvancedRecipe : ModRecipe
 	{
 		private readonly int _neededNpcType;
@@ -33,7 +36,7 @@ namespace ExampleMod.Recipe_Examples.Inheritance
 			// First we check does EoC was defeated, if not, we will return false, so recipe won't be available
 			if (!NPC.downedBoss1) return false;
 
-			//If EoC was defeated we will try find out is there is required npc nearby player
+			// If EoC was defeated we will try find out is there is required npc nearby player
 			foreach (NPC npc in Main.npc)
 			{
 				// If npc isn't active or isn't our needed type, we will skip iteration

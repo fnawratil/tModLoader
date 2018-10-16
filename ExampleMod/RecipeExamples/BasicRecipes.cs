@@ -1,46 +1,33 @@
 using ExampleMod.Items;
+using ExampleMod.Items.Placeable;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace ExampleMod.Recipe_Examples
+namespace ExampleMod.RecipeExamples
 {
 	// In this class we separate recipe related code from our main class
-	public class Recipes_Explained
+	// Learn how to do Recipes: https://github.com/blushiemagic/tModLoader/wiki/Basic-Recipes 
+	public static class BasicRecipes
 	{
-		// Define a mod we can use in this class
-		private readonly Mod _mod;
-
-		public Recipes_Explained(Mod mod)
+		// This is called by our mod class to add recipes
+		internal static void AddRecipes()
 		{
-			_mod = mod;
-		}
-
-		// This is called by our mod class and runs the example methods
-		internal void Example_Recipes()
-		{
-			// Learn about basic recipes
-			MakeBasicRecipes();
-
-			// Get some advice on how to structure your big recipe class
-			MakeLotsOfRecipes();
-
-			// To learn about polymorphism in recipes, please see Inheritance/ExampleAdvancedRecipe.cs
-			// and Inheritance/RequiresNpcRecipe.cs
+			AddBasicRecipes();
+			AddLotsOfRecipes();
 		}
 
 		// =====================================
 		// ======== BASIC RECIPES BELOW ========
 		// =====================================
+		// This section shows how to make a custom recipe, using ModRecipe
 
-		private void MakeBasicRecipes()
+		private static void AddBasicRecipes()
 		{
-			// A basic recipe looks like this
-
 			// This creates a new recipe, and specifies our mod as the source
-			ModRecipe recipe = new ModRecipe(_mod);
+			ModRecipe recipe = new ModRecipe(ExampleMod.instance);
 
 			// This adds ExampleBlock with a stack of 1 as an ingredient
-			recipe.AddIngredient(_mod.ItemType("ExampleBlock"));
+			recipe.AddIngredient(ExampleMod.instance.ItemType<ExampleBlock>());
 
 			// This makes it required to stand near a work bench (any)
 			recipe.AddTile(TileID.WorkBenches);
@@ -71,15 +58,24 @@ namespace ExampleMod.Recipe_Examples
 			recipe.AddRecipe();
 
 			// If we want to add another recipe, we have to reset the variable
-			recipe = new ModRecipe(_mod);
-			// Now we can add a new recipe
+			recipe = new ModRecipe(ExampleMod.instance);
+			// Now we can start creating a new recipe
+			// This time, we require 10 ExampleBlock instead of one
+			recipe.AddIngredient(ExampleMod.instance.ItemType<ExampleBlock>(), 10);
+			// With our recipe group...
+			recipe.AddRecipeGroup("ExampleMod:ExampleItem");
+			// To craft a gold coin
+			recipe.SetResult(ItemID.GoldCoin);
+			recipe.AddRecipe();
 		}
 
 		// =======================================
 		// ======== STRUCTURAL TIPS BELOW ========
 		// =======================================
+		// The section below provides tips to structure your recipes class,
+		// and shows a possible implementation of a helper method to make it easier to add recipes
 
-		private void MakeLotsOfRecipes()
+		private static void AddLotsOfRecipes()
 		{
 			// If you have a big mod with a lot of recipes, it is recommended to split your code
 			// into smaller chunks (method separation) so your code is more manageable.
@@ -94,19 +90,19 @@ namespace ExampleMod.Recipe_Examples
 		// Here we've made a helper method we can use to shorten our code.
 		// This is because many of our recipes follow the same terminology: one ingredient, one result, one possible required tile
 		// notice the last parameters can be made optional by specifying a default value
-		private void MakeSimpleRecipe(string modIngredient, short resultType, int ingredientStack = 1, int resultStack = 1, string reqTile = null) 
+		private static void MakeSimpleRecipe(string modIngredient, short resultType, int ingredientStack = 1, int resultStack = 1, string reqTile = null) 
 		{
 			// This initializes a new recipe, and marks it coming from _mod
-			ModRecipe recipe = new ModRecipe(_mod);
+			ModRecipe recipe = new ModRecipe(ExampleMod.instance);
 
 			// This adds an ingredient to the recipe, coming from mod by item name and a certain stack size
-			recipe.AddIngredient(_mod, modIngredient, ingredientStack);
+			recipe.AddIngredient(ExampleMod.instance, modIngredient, ingredientStack);
 
 			// If a required tile was passed..
 			if (reqTile != null)
 			{
 				// That tile is then added as a required tile for crafting this recipe
-				recipe.AddTile(_mod, reqTile);
+				recipe.AddTile(ExampleMod.instance, reqTile);
 			}
 
 			// The result of the recipe is set
@@ -117,13 +113,13 @@ namespace ExampleMod.Recipe_Examples
 		}
 
 		// We can make a method 'overload' this way, changing the first parameter
-		private void MakeSimpleRecipe(ModItem modIngredient, short resultType, int ingredientStack = 1, int resultStack = 1, ModTile reqTile = null)
+		private static void MakeSimpleRecipe(ModItem modIngredient, short resultType, int ingredientStack = 1, int resultStack = 1, ModTile reqTile = null)
 		{
 			MakeSimpleRecipe(modIngredient.Name, resultType, ingredientStack, resultStack, reqTile?.Name);
 		}
 
 		// Add recipes
-		private void AddExampleRecipes()
+		private static void AddExampleRecipes()
 		{
 			// Check the method signature of MakeSimpleRecipes for the arguments, this is a method signature:
 			// private void MakeSimpleRecipe(string _modIngredient, short resultType, int ingredientStack = 1, int resultStack = 1, string reqTile = null) 
@@ -139,7 +135,7 @@ namespace ExampleMod.Recipe_Examples
 		}
 
 		// Add boss related recipes
-		private void AddBossRecipes()
+		private static void AddBossRecipes()
 		{
 			// BossItem crafts into the following items
 			// We are using the same helper method here, and we are making use of the reqTile parameter
@@ -156,7 +152,7 @@ namespace ExampleMod.Recipe_Examples
 			// Here we see another way to retrieve items and tiles from classnames, using generic calls
 			// Useful for those who program in an IDE who wish to avoid spelling mistakes.
 			// What's also neat is that the references to classes can be automatically included in refactors, string literals cannot. (unless you have ReSharper)
-			MakeSimpleRecipe(_mod.GetItem<BossItem>(), ItemID.LihzahrdPowerCell, 10, 20, _mod.GetTile<Tiles.ExampleWorkbench>());
+			MakeSimpleRecipe(ExampleMod.instance.GetItem<BossItem>(), ItemID.LihzahrdPowerCell, 10, 20, ExampleMod.instance.GetTile<Tiles.ExampleWorkbench>());
 		}
 	}
 }

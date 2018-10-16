@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace ExampleMod.Recipe_Examples.Inheritance
+namespace ExampleMod.RecipeExamples.Inheritance
 {
 	// This is the abstraction of the functionality ExampleAdvancedRecipe.cs provides
 	// Hopefully with this, you can see what functionality was extracted and why that is useful
@@ -27,7 +27,6 @@ namespace ExampleMod.Recipe_Examples.Inheritance
 		// IF the specified Npc is close.
 		public override bool RecipeAvailable()
 		{
-			// If EoC was defeated we will try find out is there is required npc nearby player
 			// Note the use of LINQ and the lambda (where clause)
 			// This is considered filtering and useful to only match Npcs by a requirement
 			// (this prevents you from iterating Npcs you weren't looking for anyway)

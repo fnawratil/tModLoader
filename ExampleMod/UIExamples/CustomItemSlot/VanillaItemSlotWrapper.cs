@@ -5,7 +5,7 @@ using Terraria;
 using Terraria.GameInput;
 using Terraria.UI;
 
-namespace ExampleMod.UI_Examples.CustomItemSlot
+namespace ExampleMod.UIExamples.CustomItemSlot
 {
 	//@todo showcase fully custom ItemSlot class
 
@@ -19,11 +19,11 @@ namespace ExampleMod.UI_Examples.CustomItemSlot
 	public class VanillaItemSlotWrapper : UIElement
 	{
 		internal Item Item;
-		readonly int _context;
-		readonly float _scale;
+		private readonly int _context;
+		private readonly float _scale;
 		public Func<Item, bool> IsItemValid { get; set; }
 
-		public VanillaItemSlotWrapper(int context = Terraria.UI.ItemSlot.Context.BankItem, float scale = 1f)
+		public VanillaItemSlotWrapper(int context = ItemSlot.Context.BankItem, float scale = 1f)
 		{
 			_context = context;
 			_scale = scale;
@@ -47,11 +47,11 @@ namespace ExampleMod.UI_Examples.CustomItemSlot
 				if (IsItemValid == null || IsItemValid(Main.mouseItem))
 				{
 					// Handle handles all the click and hover actions based on the context.
-					Terraria.UI.ItemSlot.Handle(ref Item, _context);
+					ItemSlot.Handle(ref Item, _context);
 				}
 			}
 			// Draw draws the slot itself and Item. Depending on context, the color will change, as will drawing other things like stack counts.
-			Terraria.UI.ItemSlot.Draw(spriteBatch, ref Item, _context, rectangle.TopLeft());
+			ItemSlot.Draw(spriteBatch, ref Item, _context, rectangle.TopLeft());
 			Main.inventoryScale = oldScale;
 		}
 	}

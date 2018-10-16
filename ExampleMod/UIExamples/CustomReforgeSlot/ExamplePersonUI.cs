@@ -1,4 +1,4 @@
-﻿using ExampleMod.UI_Examples.CustomItemSlot;
+﻿using ExampleMod.UIExamples.CustomItemSlot;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
 
-namespace ExampleMod.UI_Examples.CustomReforgeSlot
+namespace ExampleMod.UIExamples.CustomReforgeSlot
 {
 	// This class represents the UIState for our ExamplePerson Awesomeify chat function. 
 	// It is similar to the Goblin Tinkerer's Reforge function, except it only gives Awesome and ReallyAwesome prefixes. 

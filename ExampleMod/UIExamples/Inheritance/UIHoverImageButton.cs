@@ -2,7 +2,7 @@
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 
-namespace ExampleMod.UI_Examples.Inheritance
+namespace ExampleMod.UIExamples.Inheritance
 {
 	// This UIHoverImageButton class inherits from UIImageButton. 
 	// Inheriting is a great tool for UI design. 
@@ -11,6 +11,8 @@ namespace ExampleMod.UI_Examples.Inheritance
 	internal class UIHoverImageButton : UIImageButton
 	{
 		private string _hoverText;
+
+		// Note: these are C#7 'expression-bodies accessors', which is more like functional programming
 		public string HoverText
 		{
 			get => _hoverText;
@@ -26,12 +28,16 @@ namespace ExampleMod.UI_Examples.Inheritance
 		{
 			// Doing it this variant allows you to add custom validation for the string (none here)
 			// Alternatively, you place this directly in the property's setter
-			return newHoverText;
+			// instead of a separate method, as the setter is actually a function underwater
+			
+			// As a sample implementation, we will trim the input
+			return newHoverText.Trim();
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch)
 		{
 			base.DrawSelf(spriteBatch);
+
 			if (IsMouseHovering)
 			{
 				// the ?? signifies null-collation (the null coalescing operator)

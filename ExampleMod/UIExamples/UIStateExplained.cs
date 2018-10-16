@@ -3,13 +3,14 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.UI;
 
-namespace ExampleMod.UI_Examples
+namespace ExampleMod.UIExamples
 {
+	//@todo separate UIState and UIElement explanation
 	// This class aims to provide helpful annotations for methods available in UIState
 	// The UIState inherits UIElement
 	// UIState really functions as a 'container' around a UIElement, and signifies the state a UI is in
 	[Obsolete("Do not use this class", error: true)] // This attribute is here to make sure this class isn't used as it exists purely to document the class
-	internal class UIState_Explained : UIState
+	internal class UIStateExplained : UIState
 	{
 		private UIElement _exampleElement;
 
@@ -52,7 +53,7 @@ namespace ExampleMod.UI_Examples
 			RecursiveParentDeregister(this, RegisterExampleClick);
 		}
 
-		// OnActivate is called when the UserInterface swithces to this state
+		// OnActivate is called when the UserInterface switches to this state
 		// Useful for initializing something you need when activated, or trigger an event of sorts
 		public override void OnActivate()
 		{
@@ -61,7 +62,7 @@ namespace ExampleMod.UI_Examples
 			//@todo move to actual example for recursion
 			// This is an example of a recursive method
 			// (it calls itself recursively)
-			// This way, the traverse parents of parents
+			// This way, you traverse parents of parents
 			// and register our OnClick functionality to the highest parent
 			// Note that, for a UIState this is likely useless, but can be useful for actual nested elements
 			void RecursiveParentRegister(UIElement el, MouseEvent evt)

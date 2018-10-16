@@ -1,6 +1,6 @@
 using System.IO;
 using System.Collections.Generic;
-using ExampleMod.ModPlayer_Examples;
+using ExampleMod.ModPlayerExamples;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;

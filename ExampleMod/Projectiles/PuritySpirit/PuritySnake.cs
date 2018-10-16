@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using ExampleMod.ModPlayer_Examples;
+using ExampleMod.ModPlayerExamples;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;

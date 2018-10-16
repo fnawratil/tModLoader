@@ -2,7 +2,7 @@
 using Terraria;
 using Terraria.ModLoader;
 
-namespace ExampleMod.Recipe_Examples.Inheritance
+namespace ExampleMod.RecipeExamples.Inheritance
 {
 	// Is a RecipeFinder, but will find a recipe always with a item*stack as ingredient
 	public class AdditionalIngredientFinder : RecipeFinder
@@ -17,7 +17,8 @@ namespace ExampleMod.Recipe_Examples.Inheritance
 		}
 
 		// By using the new keyword, we can hide the original method
-		// (this sort of functions as an override in a way)
+		// (this is almost the same as overriding a virtual member,
+		// except that you now actually intend on hiding the original)
 
 		public new Recipe FindExactRecipe()
 		{

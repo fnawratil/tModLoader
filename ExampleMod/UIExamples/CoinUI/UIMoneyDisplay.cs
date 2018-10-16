@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.UI;
 
-namespace ExampleMod.UI_Examples.CoinUI
+namespace ExampleMod.UIExamples.CoinUI
 {
 	public class UIMoneyDisplay : UIElement
 	{

@@ -13,9 +13,9 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria.UI;
 using Terraria.GameContent.UI;
 using System;
-using ExampleMod.ModPlayer_Examples;
-using ExampleMod.Recipe_Examples;
-using ExampleMod.UI_Examples.CoinUI;
+using ExampleMod.ModPlayerExamples;
+using ExampleMod.RecipeExamples;
+using ExampleMod.UIExamples.CoinUI;
 
 namespace ExampleMod
 {
@@ -171,25 +171,17 @@ namespace ExampleMod
 
 		public override void AddRecipeGroups()
 		{
-			new Example_RecipeGroups().AddExampleRecipeGroup(this);
+			RecipeGroups.AddRecipeGroups();
 		}
 
-		// Learn how to do Recipes: https://github.com/blushiemagic/tModLoader/wiki/Basic-Recipes 
 		public override void AddRecipes()
 		{
-			// Here is an example of a recipe.
-			ModRecipe recipe = new ModRecipe(this);
-			recipe.AddIngredient(null, "ExampleItem");
-			recipe.SetResult(ItemID.Wood, 999);
-			recipe.AddRecipe();
 			// PLEASE NOTE: ModItem has its own AddRecipes() hook, it is recommended to add a recipe for the item there and not here!
 
 			// To keep your Mod class tidy, it is recommended to place recipes elsewhere
-			new Recipe_Finding_And_Editing(this).Example_Recipe_Finding_And_Editing();
-			new Recipes_Explained(this).Example_Recipes();
-			// As shown above, we do not store the classes in variables.
-			// This is because we don't need them later.
-			// An alternative is making static classes
+			BasicRecipes.AddRecipes();
+			RecipeFinderAndEditor.EditRecipes();
+			// For RecipeGroups, see AddRecipeGroups()
 		}
 
 		public override void UpdateMusic(ref int music, ref MusicPriority priority)
