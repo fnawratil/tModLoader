@@ -32,10 +32,10 @@ namespace Terraria.ModLoader.UI
 		private readonly int numModsEnabled;
 		private readonly int numModsDisabled;
 		private readonly int numModsMissing;
-		readonly UIAutoScaleTextTextPanel<string> enableListButton;
-		readonly UIAutoScaleTextTextPanel<string> enableListOnlyButton;
-		readonly UIAutoScaleTextTextPanel<string> viewInModBrowserButton;
-		readonly UIAutoScaleTextTextPanel<string> updateListWithEnabledButton;
+		readonly UIScalingTextPanel<string> enableListButton;
+		readonly UIScalingTextPanel<string> enableListOnlyButton;
+		readonly UIScalingTextPanel<string> viewInModBrowserButton;
+		readonly UIScalingTextPanel<string> updateListWithEnabledButton;
 		private readonly UIImageButton deleteButton;
 		private readonly string filename;
 
@@ -75,7 +75,7 @@ namespace Terraria.ModLoader.UI
 			};
 			Append(modName);
 
-			var viewListButton = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.ModPackViewList")) {
+			var viewListButton = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPackViewList")) {
 				Width = { Pixels = 100 },
 				Height = { Pixels = 36 },
 				Left = { Pixels = 407 },
@@ -86,7 +86,7 @@ namespace Terraria.ModLoader.UI
 			viewListButton.OnClick += ViewListInfo;
 			Append(viewListButton);
 
-			enableListButton = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.ModPackEnableThisList")) {
+			enableListButton = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPackEnableThisList")) {
 				Width = { Pixels = 151 },
 				Height = { Pixels = 36 },
 				Left = { Pixels = 248 },
@@ -97,7 +97,7 @@ namespace Terraria.ModLoader.UI
 			enableListButton.OnClick += EnableList;
 			Append(enableListButton);
 
-			enableListOnlyButton = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.ModPackEnableOnlyThisList")) {
+			enableListOnlyButton = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPackEnableOnlyThisList")) {
 				Width = { Pixels = 190 },
 				Height = { Pixels = 36 },
 				Left = { Pixels = 50 },
@@ -108,7 +108,7 @@ namespace Terraria.ModLoader.UI
 			enableListOnlyButton.OnClick += EnableListOnly;
 			Append(enableListOnlyButton);
 
-			viewInModBrowserButton = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.ModPackViewModsInModBrowser")) {
+			viewInModBrowserButton = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPackViewModsInModBrowser")) {
 				Width = { Pixels = 246 },
 				Height = { Pixels = 36 },
 				Left = { Pixels = 50 },
@@ -119,7 +119,7 @@ namespace Terraria.ModLoader.UI
 			viewInModBrowserButton.OnClick += ViewInModBrowser;
 			Append(viewInModBrowserButton);
 
-			updateListWithEnabledButton = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.ModPackUpdateListWithEnabled")) {
+			updateListWithEnabledButton = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPackUpdateListWithEnabled")) {
 				Width = { Pixels = 225 },
 				Height = { Pixels = 36 },
 				Left = { Pixels = 304 },
@@ -144,7 +144,6 @@ namespace Terraria.ModLoader.UI
 		}
 
 		private void DrawEnabledText(SpriteBatch spriteBatch, Vector2 drawPos) {
-
 			string text = Language.GetTextValue("tModLoader.ModPackModsAvailableStatus", numMods, numModsEnabled, numModsDisabled, numModsMissing);
 			Color color = (numModsMissing > 0 ? Color.Red : (numModsDisabled > 0 ? Color.Yellow : Color.Green));
 
@@ -171,7 +170,7 @@ namespace Terraria.ModLoader.UI
 
 		public override void MouseOver(UIMouseEvent evt) {
 			base.MouseOver(evt);
-			this.BackgroundColor = UICommon.defaultUIBlue;
+			this.BackgroundColor = UICommon.UI_BLUE_COLOR;
 			this.BorderColor = new Color(89, 116, 213);
 		}
 
@@ -188,7 +187,8 @@ namespace Terraria.ModLoader.UI
 			if (File.Exists(path)) {
 				File.Delete(path);
 			}
-			Main.menuMode = Interface.modPacksMenuID;// should reload
+
+			Main.menuMode = Interface.modPacksMenuID; // should reload
 		}
 
 		private static void EnableList(UIMouseEvent evt, UIElement listeningElement) {
@@ -197,6 +197,7 @@ namespace Terraria.ModLoader.UI
 				if (UIModPacks.mods.Contains(modname))
 					ModLoader.EnableMod(modname);
 			}
+
 			Main.menuMode = Interface.modPacksMenuID; // should reload, which should refresh enabled counts
 
 			if (modListItem.numModsMissing > 0) {
@@ -206,6 +207,7 @@ namespace Terraria.ModLoader.UI
 						missing += modListItem.mods[i] + "\n";
 					}
 				}
+
 				Interface.infoMessage.Show(Language.GetTextValue("tModLoader.ModPackModsMissing", missing), Interface.modPacksMenuID);
 			}
 		}
@@ -215,11 +217,11 @@ namespace Terraria.ModLoader.UI
 			Interface.modBrowser.Activate();
 			Interface.modBrowser.filterTextBox.Text = "";
 			Interface.modBrowser.SpecialModPackFilter = modListItem.mods.ToList();
-			Interface.modBrowser.SpecialModPackFilterTitle = Language.GetTextValue("tModLoader.MBFilterModlist");// Too long: " + modListItem.modName.Text;
+			Interface.modBrowser.SpecialModPackFilterTitle = Language.GetTextValue("tModLoader.MBFilterModlist"); // Too long: " + modListItem.modName.Text;
 			Interface.modBrowser.updateFilterMode = UpdateFilter.All; // Set to 'All' so all mods from ModPack are visible
 			Interface.modBrowser.modSideFilterMode = ModSideFilter.All;
-			Interface.modBrowser.UpdateFilterToggle.setCurrentState((int)Interface.modBrowser.updateFilterMode);
-			Interface.modBrowser.ModSideFilterToggle.setCurrentState((int)Interface.modBrowser.modSideFilterMode);
+			Interface.modBrowser.UpdateFilterToggle.SetCurrentState((int)Interface.modBrowser.updateFilterMode);
+			Interface.modBrowser.ModSideFilterToggle.SetCurrentState((int)Interface.modBrowser.modSideFilterMode);
 			Interface.modBrowser.updateNeeded = true;
 			Main.PlaySound(SoundID.MenuOpen);
 			Main.menuMode = Interface.modBrowserID;
@@ -230,10 +232,12 @@ namespace Terraria.ModLoader.UI
 			foreach (var item in UIModPacks.mods) {
 				ModLoader.DisableMod(item);
 			}
+
 			foreach (string modname in modListItem.mods) {
 				if (UIModPacks.mods.Contains(modname))
 					ModLoader.EnableMod(modname);
 			}
+
 			Main.menuMode = Interface.reloadModsID; // should reload, which should refresh enabled counts
 
 			if (modListItem.numModsMissing > 0) {
@@ -243,6 +247,7 @@ namespace Terraria.ModLoader.UI
 						missing += modListItem.mods[i] + "\n";
 					}
 				}
+
 				Interface.infoMessage.Show(Language.GetTextValue("tModLoader.ModPackModsMissing", missing), Interface.reloadModsID);
 			}
 		}
@@ -254,6 +259,7 @@ namespace Terraria.ModLoader.UI
 			for (int i = 0; i < modListItem.mods.Length; i++) {
 				message += modListItem.mods[i] + (modListItem.modMissing[i] ? Language.GetTextValue("tModLoader.ModPackMissing") : ModLoader.IsEnabled(modListItem.mods[i]) ? "" : Language.GetTextValue("tModLoader.ModPackDisabled")) + "\n";
 			}
+
 			//Interface.infoMessage.SetMessage($"This list contains the following mods:\n{String.Join("\n", ((UIModListItem)listeningElement.Parent).mods)}");
 			Interface.infoMessage.Show(Language.GetTextValue("tModLoader.ModPackModsContained", message), Interface.modPacksMenuID);
 		}
@@ -263,6 +269,7 @@ namespace Terraria.ModLoader.UI
 			if (item == null) {
 				return base.CompareTo(obj);
 			}
+
 			return filename.CompareTo(item.filename);
 		}
 	}

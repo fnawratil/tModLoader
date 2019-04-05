@@ -14,25 +14,25 @@ namespace Terraria.ModLoader.UI
 	//TODO: of all the download UIs, this one has been refactored the best
 	internal class UIDownloadFile : UIState
 	{
-		private UILoadProgress loadProgress;
-		private string name;
-		private string url;
-		private string file;
-		private Action success;
-		private Action failure; //TODO unused?
-		private Action cancelAction;
-		private WebClient client;
+		private UILoadProgress _loadProgress;
+		private string _name;
+		private string _url;
+		private string _file;
+		private Action _success;
+		private Action _failure; //TODO unused?
+		private Action _cancelAction;
+		private WebClient _client;
 
 		public override void OnInitialize() {
-			loadProgress = new UILoadProgress {
+			_loadProgress = new UILoadProgress {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Height = { Pixels = 150 },
 				HAlign = 0.5f,
 				VAlign = 0.5f,
 				Top = { Pixels = 10 }
 			};
-			Append(loadProgress);
+			Append(_loadProgress);
 
 			var cancel = new UITextPanel<string>(Language.GetTextValue("UI.Cancel"), 0.75f, true) {
 				VAlign = 0.5f,
@@ -44,29 +44,31 @@ namespace Terraria.ModLoader.UI
 		}
 
 		public override void OnActivate() {
-			loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", name));
-			loadProgress.SetProgress(0f);
-			if (!UIModBrowser.PlatformSupportsTls12) { // Needed for downloads from Github
+			_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", _name));
+			_loadProgress.SetProgress(0f);
+			if (!UIModBrowser.PlatformSupportsTls12) {
+				// Needed for downloads from Github
+				Logging.tML.Warn("Detected the client's computer does not support TLS 1.2 which is required for downloading.");
 				Interface.errorMessage.Show("TLS 1.2 not supported on this computer.", 0); // github releases
 				return;
 			}
-			
+
 			ServicePointManager.SecurityProtocol |= (SecurityProtocolType)3072; // SecurityProtocolType.Tls12
-			
-			client = new WebClient();
-			ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => true);
-			SetCancel(client.CancelAsync);
-			client.DownloadProgressChanged += Client_DownloadProgressChanged;
-			client.DownloadFileCompleted += Client_DownloadFileCompleted;
-			client.DownloadFileAsync(new Uri(url), file);
+
+			_client = new WebClient();
+			ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, policyErrors) => true;
+			SetCancel(_client.CancelAsync);
+			_client.DownloadProgressChanged += Client_DownloadProgressChanged;
+			_client.DownloadFileCompleted += Client_DownloadFileCompleted;
+			_client.DownloadFileAsync(new Uri(_url), _file);
 		}
 
 		private void Client_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e) {
-			client.Dispose();
-			client = null;
+			_client.Dispose();
+			_client = null;
 
 			if (e.Error == null && !e.Cancelled) {
-				success();
+				_success();
 				return;
 			}
 
@@ -76,11 +78,11 @@ namespace Terraria.ModLoader.UI
 			else {
 				// TODO: Think about what message to put here.
 				var errorKey = GetHttpStatusCode(e.Error) == HttpStatusCode.ServiceUnavailable ? "MBExceededBandwidth" : "MBUnknownMBError";
-				Interface.errorMessage.Show(Language.GetTextValue("tModLoader."+errorKey), 0);
+				Interface.errorMessage.Show(Language.GetTextValue("tModLoader." + errorKey), 0);
 			}
 
-			if (File.Exists(file))
-				File.Delete(file);
+			if (File.Exists(_file))
+				File.Delete(_file);
 		}
 
 		private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e) {
@@ -88,27 +90,27 @@ namespace Terraria.ModLoader.UI
 		}
 
 		internal void SetDownloading(string name, string url, string file, Action success) {
-			this.name = name;
-			this.url = url;
-			this.file = file;
-			this.success = success;
+			_name = name;
+			_url = url;
+			_file = file;
+			_success = success;
 		}
 
 		public void SetCancel(Action cancelAction) {
-			this.cancelAction = cancelAction;
+			_cancelAction = cancelAction;
 		}
 
 		internal void SetProgress(DownloadProgressChangedEventArgs e) => SetProgress(e.BytesReceived, e.TotalBytesToReceive);
+
 		internal void SetProgress(long count, long len) {
-			loadProgress?.SetProgress((float)count / len);
+			_loadProgress?.SetProgress((float)count / len);
 		}
 
 		private void CancelClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(SoundID.MenuOpen);
-			cancelAction?.Invoke();
+			_cancelAction?.Invoke();
 		}
 
-		private HttpStatusCode GetHttpStatusCode(Exception err) =>
-			err is WebException we && we.Response is HttpWebResponse response ? response.StatusCode : 0;
+		private HttpStatusCode GetHttpStatusCode(Exception err) => err is WebException exc && exc.Response is HttpWebResponse response ? response.StatusCode : 0;
 	}
 }

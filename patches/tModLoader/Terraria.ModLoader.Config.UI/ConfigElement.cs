@@ -47,7 +47,7 @@ namespace Terraria.ModLoader.Config.UI
 			this.memberInfo = memberInfo;
 			this.item = item;
 			this.array = array;
-			this.backgroundColor = UICommon.defaultUIBlue;
+			this.backgroundColor = UICommon.UI_BLUE_COLOR;
 			this._TextDisplayFunction = () => memberInfo.Name;
 			labelAttribute = ConfigManager.GetCustomAttribute<LabelAttribute>(memberInfo, item, array);
 			if (labelAttribute != null)

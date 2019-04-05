@@ -7,28 +7,28 @@ using Terraria.UI;
 
 namespace Terraria.ModLoader.UI
 {
+	/// <summary>
+	/// Provides common utilities for UI components for which most act like fluent APIs
+	/// </summary>
 	public static class UICommon
 	{
-		public static Color defaultUIBlue = new Color(73, 94, 171);
-		public static Color defaultUIBlueMouseOver = new Color(63, 82, 151) * 0.7f;
-		public static Color mainPanelBackground = new Color(33, 43, 79) * 0.8f;
+		public static Color UI_BLUE_COLOR = new Color(73, 94, 171);
+		public static Color UI_BLUE_MOUSEOVER_COLOR = new Color(63, 82, 151) * 0.7f;
+		public static Color MAIN_PANEL_BG_COLOR = new Color(33, 43, 79) * 0.8f;
+		public static StyleDimension MAX_PANEL_WIDTH = new StyleDimension(600, 0);
 
-		public static StyleDimension MaxPanelWidth = new StyleDimension(600, 0);
+		public static T WithFadedMouseOver<T>(this T elem, Color overColor = default, Color outColor = default) where T : UIPanel {
+			if (overColor == default)
+				overColor = UI_BLUE_COLOR;
 
-		public static T WithFadedMouseOver<T>(this T elem, Color overColor = default(Color), Color outColor = default(Color)) where T : UIPanel {
-			if (overColor == default(Color))
-				overColor = defaultUIBlue;
-
-			if (outColor == default(Color))
-				outColor = defaultUIBlueMouseOver;
+			if (outColor == default)
+				outColor = UI_BLUE_MOUSEOVER_COLOR;
 
 			elem.OnMouseOver += (evt, _) => {
-				Main.PlaySound(SoundID.MenuTick);
-				elem.BackgroundColor = overColor;
-			};
-			elem.OnMouseOut += (evt, _) => {
-				elem.BackgroundColor = outColor;
-			};
+				                    Main.PlaySound(SoundID.MenuTick);
+				                    elem.BackgroundColor = overColor;
+			                    };
+			elem.OnMouseOut += (evt, _) => { elem.BackgroundColor = outColor; };
 			return elem;
 		}
 
@@ -37,6 +37,7 @@ namespace Terraria.ModLoader.UI
 			return elem;
 		}
 
+		// TODO unused, needed?
 		public static T WithPadding<T>(this T elem, string name, int id, Vector2? anchor = null, Vector2? offset = null) where T : UIElement {
 			elem.SetSnapPoint(name, id, anchor, offset);
 			return elem;
@@ -47,11 +48,12 @@ namespace Terraria.ModLoader.UI
 			return elem;
 		}
 
-		public static void AddOrRemoveChild(this UIElement elem, UIElement child, bool add) {
-			if (!add) 
+		public static T AddOrRemoveChild<T>(this T elem, UIElement child, bool add) where T : UIElement {
+			if (!add)
 				elem.RemoveChild(child);
-			else if (!elem.HasChild(child)) 
+			else if (!elem.HasChild(child))
 				elem.Append(child);
+			return elem;
 		}
 
 		public static void DrawHoverStringInBounds(SpriteBatch spriteBatch, string text, Rectangle? bounds = null) {
@@ -61,7 +63,8 @@ namespace Terraria.ModLoader.UI
 			Vector2 vector = Main.MouseScreen + new Vector2(16f);
 			vector.X = Math.Min(vector.X, bounds.Value.Right - x - 16);
 			vector.Y = Math.Min(vector.Y, bounds.Value.Bottom - 30);
-			Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, text, vector.X, vector.Y, new Color((int)Main.mouseTextColor, (int)Main.mouseTextColor, (int)Main.mouseTextColor, (int)Main.mouseTextColor), Color.Black, Vector2.Zero, 1f);
+			Color drawColor = new Color(Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor);
+			Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, text, vector.X, vector.Y, drawColor, Color.Black, Vector2.Zero, 1f);
 		}
 	}
 }

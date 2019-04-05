@@ -69,7 +69,7 @@ namespace Terraria.ModLoader.UI
 
 		public override void MouseOver(UIMouseEvent evt) {
 			base.MouseOver(evt);
-			this.BackgroundColor = UICommon.defaultUIBlue;
+			this.BackgroundColor = UICommon.UI_BLUE_COLOR;
 			this.BorderColor = new Color(89, 116, 213);
 		}
 
@@ -85,12 +85,12 @@ namespace Terraria.ModLoader.UI
 				Interface.enterPassphraseMenu.SetGotoMenu(Interface.managePublishedID);
 				return;
 			}
+
 			Main.PlaySound(12);
 			try {
 				ServicePointManager.Expect100Continue = false;
 				string url = "http://javid.ddns.net/tModLoader/unpublishmymod.php";
-				var values = new NameValueCollection
-				{
+				var values = new NameValueCollection {
 					{ "name", this.name },
 					{ "steamid64", ModLoader.SteamID64 },
 					{ "modloaderversion", ModLoader.versionedName },

@@ -8,17 +8,17 @@ using Terraria.UI;
 
 namespace Terraria.ModLoader.UI
 {
-	class UICreateMod : UIState
+	internal class UICreateMod : UIState
 	{
-		UITextPanel<string> messagePanel;
-		UIFocusInputTextField modName;
-		UIFocusInputTextField modDiplayName;
-		UIFocusInputTextField modAuthor;
+		private UITextPanel<string> _messagePanel;
+		private UIFocusInputTextField _modName;
+		private UIFocusInputTextField _modDisplayName;
+		private UIFocusInputTextField _modAuthor;
 
 		public override void OnInitialize() {
 			var uIElement = new UIElement {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Top = { Pixels = 220 },
 				Height = { Pixels = -220, Percent = 1f },
 				HAlign = 0.5f
@@ -28,7 +28,7 @@ namespace Terraria.ModLoader.UI
 			var mainPanel = new UIPanel {
 				Width = { Percent = 1f },
 				Height = { Pixels = -110, Percent = 1f },
-				BackgroundColor = UICommon.mainPanelBackground,
+				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR,
 				PaddingTop = 0f
 			};
 			uIElement.Append(mainPanel);
@@ -36,17 +36,17 @@ namespace Terraria.ModLoader.UI
 			var uITextPanel = new UITextPanel<string>(Language.GetTextValue("tModLoader.MSCreateMod"), 0.8f, true) {
 				HAlign = 0.5f,
 				Top = { Pixels = -35 },
-				BackgroundColor = UICommon.defaultUIBlue
+				BackgroundColor = UICommon.UI_BLUE_COLOR
 			}.WithPadding(15);
 			uIElement.Append(uITextPanel);
 
-			messagePanel = new UITextPanel<string>(Language.GetTextValue("")) {
+			_messagePanel = new UITextPanel<string>(Language.GetTextValue("")) {
 				Width = { Percent = 1f },
 				Height = { Pixels = 25 },
 				VAlign = 1f,
 				Top = { Pixels = -20 }
 			};
-			uIElement.Append(messagePanel);
+			uIElement.Append(_messagePanel);
 
 			var buttonBack = new UITextPanel<string>(Language.GetTextValue("UI.Back")) {
 				Width = { Pixels = -10, Percent = 0.5f },
@@ -54,25 +54,25 @@ namespace Terraria.ModLoader.UI
 				VAlign = 1f,
 				Top = { Pixels = -65 }
 			}.WithFadedMouseOver();
-			buttonBack.OnClick += BackClick;
+			buttonBack.OnClick += OnClickBack;
 			uIElement.Append(buttonBack);
 
 			var buttonCreate = new UITextPanel<string>(Language.GetTextValue("LegacyMenu.28")); // Create
 			buttonCreate.CopyStyle(buttonBack);
 			buttonCreate.HAlign = 1f;
 			buttonCreate.WithFadedMouseOver();
-			buttonCreate.OnClick += OKClick;
+			buttonCreate.OnClick += OnClickCreate;
 			uIElement.Append(buttonCreate);
 
 			float top = 16;
-			modName = createAndAppendTextInputWithLabel("ModName (no spaces)", "Type here");
-			modName.OnTextChange += (a, b) => { modName.SetText(modName.currentString.Replace(" ", "")); };
-			modDiplayName = createAndAppendTextInputWithLabel("Mod DisplayName", "Type here");
-			modAuthor = createAndAppendTextInputWithLabel("Mod Author", "Type here");
+			_modName = CreateAndAppendTextInputWithLabel("ModName (no spaces)", "Type here");
+			_modName.OnTextChange += (a, b) => { _modName.SetText(_modName.currentString.Replace(" ", "")); };
+			_modDisplayName = CreateAndAppendTextInputWithLabel("Mod DisplayName", "Type here");
+			_modAuthor = CreateAndAppendTextInputWithLabel("Mod Author", "Type here");
 			// TODO: OnTab
 			// TODO: Starting Item checkbox
 
-			UIFocusInputTextField createAndAppendTextInputWithLabel(string label, string hint) {
+			UIFocusInputTextField CreateAndAppendTextInputWithLabel(string label, string hint) {
 				var panel = new UIPanel();
 				panel.SetPadding(0);
 				panel.Width.Set(0, 1f);
@@ -110,39 +110,40 @@ namespace Terraria.ModLoader.UI
 
 		public override void OnActivate() {
 			base.OnActivate();
-			modName.SetText("");
-			modDiplayName.SetText("");
-			modAuthor.SetText("");
-			messagePanel.SetText("");
+			_modName.SetText("");
+			_modDisplayName.SetText("");
+			_modAuthor.SetText("");
+			_messagePanel.SetText("");
 		}
 
-		private void BackClick(UIMouseEvent evt, UIElement listeningElement) {
+		private void OnClickBack(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(SoundID.MenuClose);
 			Main.menuMode = Interface.modSourcesID;
 		}
 
-		private void OKClick(UIMouseEvent evt, UIElement listeningElement) {
-			string modNameTrimmed = modName.currentString.Trim();
+		private void OnClickCreate(UIMouseEvent evt, UIElement listeningElement) {
+			string modNameTrimmed = _modName.currentString.Trim();
 			string sourceFolder = ModCompile.ModSourcePath + Path.DirectorySeparatorChar + modNameTrimmed;
 			var provider = CodeDomProvider.CreateProvider("C#");
-			if(Directory.Exists(sourceFolder))
-				messagePanel.SetText("Folder already exists");
+			if (Directory.Exists(sourceFolder))
+				_messagePanel.SetText("Folder already exists");
 			else if (!provider.IsValidIdentifier(modNameTrimmed))
-				messagePanel.SetText("ModName is invalid C# identifier. Remove spaces.");
-			else if (string.IsNullOrWhiteSpace(modDiplayName.currentString))
-				messagePanel.SetText("DisplayName can't be empty");
-			else if (string.IsNullOrWhiteSpace(modAuthor.currentString))
-				messagePanel.SetText("Author can't be empty");
-			else if (string.IsNullOrWhiteSpace(modAuthor.currentString))
-				messagePanel.SetText("Author can't be empty");
+				_messagePanel.SetText("ModName is invalid C# identifier. Remove spaces.");
+			else if (string.IsNullOrWhiteSpace(_modDisplayName.currentString))
+				_messagePanel.SetText("DisplayName can't be empty");
+			else if (string.IsNullOrWhiteSpace(_modAuthor.currentString))
+				_messagePanel.SetText("Author can't be empty");
+			else if (string.IsNullOrWhiteSpace(_modAuthor.currentString))
+				_messagePanel.SetText("Author can't be empty");
 			else {
 				Main.PlaySound(SoundID.MenuOpen);
 				Main.menuMode = Interface.modSourcesID;
 				Directory.CreateDirectory(sourceFolder);
 
 				// TODO: Simple ModItem and PNG, verbatim line endings, localization.
-				File.WriteAllText(Path.Combine(sourceFolder, "build.txt"), $"displayName = {modDiplayName.currentString}{Environment.NewLine}author = {modAuthor.currentString}{Environment.NewLine}version = 0.1");
-				File.WriteAllText(Path.Combine(sourceFolder, "description.txt"), $"{modDiplayName.currentString} is a pretty cool mod, it does...this. Modify this file with a description of your mod.");
+				// TODO move the contents of files being written to resource files
+				File.WriteAllText(Path.Combine(sourceFolder, "build.txt"), $"displayName = {_modDisplayName.currentString}{Environment.NewLine}author = {_modAuthor.currentString}{Environment.NewLine}version = 0.1");
+				File.WriteAllText(Path.Combine(sourceFolder, "description.txt"), $"{_modDisplayName.currentString} is a pretty cool mod, it does...this. Modify this file with a description of your mod.");
 				File.WriteAllText(Path.Combine(sourceFolder, $"{modNameTrimmed}.cs"), $@"using Terraria.ModLoader;
 
 namespace {modNameTrimmed}

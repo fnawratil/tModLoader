@@ -45,6 +45,7 @@ namespace Terraria.ModLoader.UI
 			if (_scrollbar != null) {
 				position = -_scrollbar.GetValue();
 			}
+
 			foreach (var drawtext in drawtexts) {
 				if (position + drawtext.Item2 > space.Height)
 					break;
@@ -52,6 +53,7 @@ namespace Terraria.ModLoader.UI
 					Utils.DrawBorderString(spriteBatch, drawtext.Item1, new Vector2(space.X, space.Y + position), Color.White, 1f);
 				position += drawtext.Item2;
 			}
+
 			this.Recalculate();
 		}
 
@@ -60,10 +62,12 @@ namespace Terraria.ModLoader.UI
 			if (!heightNeedsRecalculating) {
 				return;
 			}
+
 			CalculatedStyle space = GetInnerDimensions();
 			if (space.Width <= 0 || space.Height <= 0) {
 				return;
 			}
+
 			DynamicSpriteFont font = Main.fontMouseText;
 			drawtexts.Clear();
 			float position = 0f;
@@ -76,6 +80,7 @@ namespace Terraria.ModLoader.UI
 						remainder = drawString[drawString.Length - 1] + remainder;
 						drawString = drawString.Substring(0, drawString.Length - 1);
 					}
+
 					if (remainder.Length > 0) {
 						int index = drawString.LastIndexOf(' ');
 						if (index >= 0) {
@@ -83,12 +88,13 @@ namespace Terraria.ModLoader.UI
 							drawString = drawString.Substring(0, index);
 						}
 					}
+
 					drawtexts.Add(new Tuple<string, float>(drawString, textHeight));
 					position += textHeight;
 					drawString = remainder;
-				}
-				while (drawString.Length > 0);
+				} while (drawString.Length > 0);
 			}
+
 			height = position;
 			heightNeedsRecalculating = false;
 		}

@@ -38,8 +38,8 @@ namespace Terraria.ModLoader.UI
 		private readonly Texture2D dividerTexture;
 		private readonly Texture2D innerPanelTexture;
 		private readonly UIText modName;
-		private readonly UIAutoScaleTextTextPanel<string> updateButton;
-		private readonly UIAutoScaleTextTextPanel<string> moreInfoButton;
+		private readonly UIScalingTextPanel<string> updateButton;
+		private readonly UIScalingTextPanel<string> moreInfoButton;
 		private UIImage modIcon;
 		public bool update = false;
 		public bool updateIsDowngrade = false;
@@ -80,7 +80,7 @@ namespace Terraria.ModLoader.UI
 			};
 			Append(modName);
 
-			moreInfoButton = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.ModsMoreInfo")) {
+			moreInfoButton = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModsMoreInfo")) {
 				Width = { Pixels = 100 },
 				Height = { Pixels = 36 },
 				Left = { Pixels = left },
@@ -92,8 +92,8 @@ namespace Terraria.ModLoader.UI
 			Append(moreInfoButton);
 
 			if (update || installed == null) {
-				updateButton = new UIAutoScaleTextTextPanel<string>(this.update ? (updateIsDowngrade ? Language.GetTextValue("tModLoader.MBDowngrade") : Language.GetTextValue("tModLoader.MBUpdate")) : Language.GetTextValue("tModLoader.MBDownload"), 1f,
-					false);
+				updateButton = new UIScalingTextPanel<string>(this.update ? (updateIsDowngrade ? Language.GetTextValue("tModLoader.MBDowngrade") : Language.GetTextValue("tModLoader.MBUpdate")) : Language.GetTextValue("tModLoader.MBDownload"), 1f,
+															  false);
 				updateButton.CopyStyle(moreInfoButton);
 				updateButton.Width.Pixels = HasModIcon ? 120 : 200;
 				updateButton.Left.Pixels = moreInfoButton.Width.Pixels + moreInfoButton.Left.Pixels + 5f;
@@ -101,9 +101,10 @@ namespace Terraria.ModLoader.UI
 				updateButton.OnClick += DownloadMod;
 				Append(updateButton);
 			}
+
 			if (modreferences.Length > 0) {
 				var icon = Texture2D.FromStream(Main.instance.GraphicsDevice,
-				Assembly.GetExecutingAssembly().GetManifestResourceStream("Terraria.ModLoader.UI.ButtonExclamation.png"));
+												Assembly.GetExecutingAssembly().GetManifestResourceStream("Terraria.ModLoader.UI.ButtonExclamation.png"));
 				var modReferenceIcon = new UIHoverImage(icon, Language.GetTextValue("tModLoader.MBClickToViewDependencyMods", string.Join("\n", modreferences.Split(',').Select(x => x.Trim())))) {
 					Left = { Pixels = -149, Percent = 1f },
 					Top = { Pixels = 48 }
@@ -118,6 +119,7 @@ namespace Terraria.ModLoader.UI
 				};
 				Append(modReferenceIcon);
 			}
+
 			OnDoubleClick += RequestMoreinfo;
 		}
 
@@ -145,6 +147,7 @@ namespace Terraria.ModLoader.UI
 			if (Interface.modBrowser.SpecialModPackFilter != null && !Interface.modBrowser.SpecialModPackFilter.Contains(mod)) {
 				return false;
 			}
+
 			if (Interface.modBrowser.filter.Length > 0) {
 				if (Interface.modBrowser.searchFilterMode == SearchFilter.Author) {
 					if (author.IndexOf(Interface.modBrowser.filter, StringComparison.OrdinalIgnoreCase) == -1) {
@@ -157,10 +160,12 @@ namespace Terraria.ModLoader.UI
 					}
 				}
 			}
+
 			if (Interface.modBrowser.modSideFilterMode != ModSideFilter.All) {
 				if ((int)modside != (int)Interface.modBrowser.modSideFilterMode - 1)
 					return false;
 			}
+
 			switch (Interface.modBrowser.updateFilterMode) {
 				default:
 				case UpdateFilter.All:
@@ -178,6 +183,7 @@ namespace Terraria.ModLoader.UI
 			if (HasModIcon && !modIconWanted) {
 				modIconWanted = true;
 			}
+
 			CalculatedStyle innerDimensions = GetInnerDimensions();
 			//draw divider
 			Vector2 drawPos = new Vector2(innerDimensions.X + 5f + ModIconAdjust, innerDimensions.Y + 30f);
@@ -198,6 +204,7 @@ namespace Terraria.ModLoader.UI
 					client.DownloadDataAsync(new Uri(modIconURL));
 				}
 			}
+
 			if (modIconReady) {
 				modIconReady = false;
 				modIconAppended = true;
@@ -249,6 +256,7 @@ namespace Terraria.ModLoader.UI
 			if (timeStamp == "0000-00-00 00:00:00") {
 				return;
 			}
+
 			try {
 				var MyDateTime = DateTime.Parse(timeStamp); // parse date
 				string text = TimeHelper.HumanTimeSpanString(MyDateTime); // get time text
@@ -262,7 +270,7 @@ namespace Terraria.ModLoader.UI
 
 		public override void MouseOver(UIMouseEvent evt) {
 			base.MouseOver(evt);
-			BackgroundColor = UICommon.defaultUIBlue;
+			BackgroundColor = UICommon.UI_BLUE_COLOR;
 			BorderColor = new Color(89, 116, 213);
 		}
 
@@ -285,10 +293,9 @@ namespace Terraria.ModLoader.UI
 			try {
 				ServicePointManager.Expect100Continue = false;
 				string url = "http://javid.ddns.net/tModLoader/moddescription.php";
-				var values = new NameValueCollection
-					{
-						{ "modname", mod },
-					};
+				var values = new NameValueCollection {
+					{ "modname", mod },
+				};
 				using (WebClient client = new WebClient()) {
 					ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => { return true; });
 					client.UploadValuesCompleted += new UploadValuesCompletedEventHandler(Moreinfo);

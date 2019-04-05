@@ -26,7 +26,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnInitialize() {
 			uIElement = new UIElement {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Top = { Pixels = 220 },
 				Height = { Pixels = -220, Percent = 1f },
 				HAlign = 0.5f
@@ -35,7 +35,7 @@ namespace Terraria.ModLoader.UI
 			uIPanel = new UIPanel {
 				Width = { Percent = 1f },
 				Height = { Pixels = -110, Percent = 1f },
-				BackgroundColor = UICommon.mainPanelBackground
+				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR
 			};
 			uIElement.Append(uIPanel);
 
@@ -58,11 +58,11 @@ namespace Terraria.ModLoader.UI
 			var uIHeaderTextPanel = new UITextPanel<string>(Language.GetTextValue("tModLoader.MenuModSources"), 0.8f, true) {
 				HAlign = 0.5f,
 				Top = { Pixels = -35 },
-				BackgroundColor = UICommon.defaultUIBlue
+				BackgroundColor = UICommon.UI_BLUE_COLOR
 			}.WithPadding(15f);
 			uIElement.Append(uIHeaderTextPanel);
 
-			var buttonBA = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.MSBuildAll")) {
+			var buttonBA = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.MSBuildAll")) {
 				Width = { Pixels = -10, Percent = 1f / 3f },
 				Height = { Pixels = 40 },
 				VAlign = 1f,
@@ -72,21 +72,21 @@ namespace Terraria.ModLoader.UI
 			buttonBA.OnClick += BuildMods;
 			uIElement.Append(buttonBA);
 
-			var buttonBRA = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.MSBuildReloadAll"));
+			var buttonBRA = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.MSBuildReloadAll"));
 			buttonBRA.CopyStyle(buttonBA);
 			buttonBRA.HAlign = 0.5f;
 			buttonBRA.WithFadedMouseOver();
 			buttonBRA.OnClick += BuildAndReload;
 			uIElement.Append(buttonBRA);
 
-			var buttonCreateMod = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.MSCreateMod"));
+			var buttonCreateMod = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.MSCreateMod"));
 			buttonCreateMod.CopyStyle(buttonBA);
 			buttonCreateMod.HAlign = 1f;
 			buttonCreateMod.WithFadedMouseOver();
 			buttonCreateMod.OnClick += ButtonCreateMod_OnClick;
 			uIElement.Append(buttonCreateMod);
 
-			var buttonB = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("UI.Back"));
+			var buttonB = new UIScalingTextPanel<string>(Language.GetTextValue("UI.Back"));
 			buttonB.CopyStyle(buttonBA);
 			//buttonB.Width.Set(-10f, 1f / 3f);
 			buttonB.Top.Pixels = -20;
@@ -94,14 +94,14 @@ namespace Terraria.ModLoader.UI
 			buttonB.OnClick += BackClick;
 			uIElement.Append(buttonB);
 
-			var buttonOS = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.MSOpenSources"));
+			var buttonOS = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.MSOpenSources"));
 			buttonOS.CopyStyle(buttonB);
 			buttonOS.HAlign = .5f;
 			buttonOS.WithFadedMouseOver();
 			buttonOS.OnClick += OpenSources;
 			uIElement.Append(buttonOS);
 
-			var buttonMP = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.MSManagePublished"));
+			var buttonMP = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.MSManagePublished"));
 			buttonMP.CopyStyle(buttonB);
 			buttonMP.HAlign = 1f;
 			buttonMP.WithFadedMouseOver();
@@ -163,8 +163,7 @@ namespace Terraria.ModLoader.UI
 		}
 
 		internal void Populate() {
-			Task.Factory.StartNew(
-				delegate {
+			Task.Factory.StartNew(delegate {
 					var modSources = ModCompile.FindModSources();
 					var modFiles = ModOrganizer.FindMods();
 					return Tuple.Create(modSources, modFiles);
@@ -176,6 +175,7 @@ namespace Terraria.ModLoader.UI
 						var builtMod = modFiles.SingleOrDefault(m => m.Name == Path.GetFileName(sourcePath));
 						items.Add(new UIModSourceItem(sourcePath, builtMod));
 					}
+
 					updateNeeded = true;
 				}, TaskScheduler.FromCurrentSynchronizationContext());
 		}

@@ -16,7 +16,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnInitialize() {
 			var uIElement = new UIElement {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Top = { Pixels = 220 },
 				Height = { Pixels = -220, Percent = 1f },
 				HAlign = 0.5f
@@ -25,7 +25,7 @@ namespace Terraria.ModLoader.UI
 			var uIPanel = new UIPanel {
 				Width = { Percent = 1f },
 				Height = { Pixels = -110, Percent = 1f },
-				BackgroundColor = UICommon.mainPanelBackground,
+				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR,
 				PaddingTop = 0f
 			};
 			uIElement.Append(uIPanel);
@@ -33,10 +33,10 @@ namespace Terraria.ModLoader.UI
 			uITextPanel = new UITextPanel<string>(Language.GetTextValue("tModLoader.MBPublishEnterPassphrase"), 0.8f, true) {
 				HAlign = 0.5f,
 				Top = { Pixels = -35 },
-				BackgroundColor = UICommon.defaultUIBlue
+				BackgroundColor = UICommon.UI_BLUE_COLOR
 			}.WithPadding(15);
 			uIElement.Append(uITextPanel);
-			
+
 			var buttonBack = new UITextPanel<string>(Language.GetTextValue("UI.Back")) {
 				Width = { Pixels = -10, Percent = 0.5f },
 				Height = { Pixels = 25 },
@@ -94,8 +94,7 @@ namespace Terraria.ModLoader.UI
 			Process.Start(registerURL);
 		}
 
-		private void OnTextChange(object sender, EventArgs e) {
-		}
+		private void OnTextChange(object sender, EventArgs e) { }
 
 		internal void SetGotoMenu(int gotoMenu) {
 			this.gotoMenu = gotoMenu;

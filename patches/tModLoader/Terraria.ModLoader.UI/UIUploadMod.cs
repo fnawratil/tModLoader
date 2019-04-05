@@ -15,7 +15,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnInitialize() {
 			loadProgress = new UILoadProgress {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Height = { Pixels = 150 },
 				HAlign = 0.5f,
 				VAlign = 0.5f,
@@ -46,6 +46,7 @@ namespace Terraria.ModLoader.UI
 		}
 
 		internal void SetProgress(UploadProgressChangedEventArgs e) => SetProgress(e.BytesSent, e.TotalBytesToSend);
+
 		internal void SetProgress(long count, long len) {
 			loadProgress?.SetProgress((float)count / len);
 		}

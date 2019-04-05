@@ -14,7 +14,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnInitialize() {
 			loadProgress = new UILoadProgress {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Height = { Pixels = 150 },
 				HAlign = 0.5f,
 				VAlign = 0.5f,
@@ -50,6 +50,7 @@ namespace Terraria.ModLoader.UI
 
 		public int modCount;
 		private string stageText;
+
 		public void SetLoadStage(string stageText, int modCount = -1) {
 			this.stageText = stageText;
 			this.modCount = modCount;

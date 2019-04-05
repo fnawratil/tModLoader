@@ -15,7 +15,7 @@ namespace Terraria.ModLoader.UI
 			loadProgress = new UILoadProgress {
 				Top = { Pixels = 10 },
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Height = { Pixels = 150 },
 				HAlign = 0.5f,
 				VAlign = 0.5f
@@ -33,6 +33,7 @@ namespace Terraria.ModLoader.UI
 		}
 
 		private string mod;
+
 		public void SetMod(string modName) {
 			mod = modName;
 		}
@@ -44,7 +45,7 @@ namespace Terraria.ModLoader.UI
 			if (e != null)
 				msg += "\n" + e;
 
-			Interface.errorMessage.Show(msg, Interface.modSourcesID, e.HelpLink);
+			Interface.errorMessage.Show(msg, Interface.modSourcesID, e?.HelpLink);
 		}
 
 		public void LogCompileErrors(string dllName, CompilerErrorCollection errors, string hint) {
@@ -57,6 +58,7 @@ namespace Terraria.ModLoader.UI
 				else if (displayError == null)
 					displayError = error;
 			}
+
 			var msg = Language.GetTextValue("tModLoader.CompileError", dllName, errors.Count - warnings, warnings);
 			if (hint != null)
 				msg += "\n" + hint;

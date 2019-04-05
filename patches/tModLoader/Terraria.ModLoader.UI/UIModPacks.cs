@@ -24,7 +24,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnInitialize() {
 			var uIElement = new UIElement {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Top = { Pixels = 220 },
 				Height = { Pixels = -220, Percent = 1f },
 				HAlign = 0.5f
@@ -35,7 +35,7 @@ namespace Terraria.ModLoader.UI
 			scrollPanel = new UIPanel {
 				Width = { Percent = 1f },
 				Height = { Pixels = -65, Percent = 1f },
-				BackgroundColor = UICommon.mainPanelBackground
+				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR
 			};
 			uIElement.Append(scrollPanel);
 
@@ -56,11 +56,11 @@ namespace Terraria.ModLoader.UI
 			var titleTextPanel = new UITextPanel<string>(Language.GetTextValue("tModLoader.ModPacksHeader"), 0.8f, true) {
 				HAlign = 0.5f,
 				Top = { Pixels = -35 },
-				BackgroundColor = UICommon.defaultUIBlue
+				BackgroundColor = UICommon.UI_BLUE_COLOR
 			}.WithPadding(15f);
 			uIElement.Append(titleTextPanel);
 
-			var backButton = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("UI.Back")) {
+			var backButton = new UIScalingTextPanel<string>(Language.GetTextValue("UI.Back")) {
 				Width = new StyleDimension(-10f, 1f / 2f),
 				Height = { Pixels = 40 },
 				VAlign = 1f,
@@ -69,7 +69,7 @@ namespace Terraria.ModLoader.UI
 			backButton.OnClick += BackClick;
 			uIElement.Append(backButton);
 
-			var saveNewButton = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.ModPacksSaveEnabledAsNewPack"));
+			var saveNewButton = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPacksSaveEnabledAsNewPack"));
 			saveNewButton.CopyStyle(backButton);
 			saveNewButton.TextColor = Color.Green;
 			saveNewButton.HAlign = 1f;
@@ -134,17 +134,19 @@ namespace Terraria.ModLoader.UI
 									mods = JsonConvert.DeserializeObject<string[]>(json);
 								}
 							}
+
 							UIModPackItem modItem = new UIModPackItem(Path.GetFileNameWithoutExtension(modListFilePath), mods);
 							modListList.Add(modItem);
 						}
 						catch {
-							var badModPackMessage = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.ModPackMalformed", Path.GetFileName(modListFilePath))) {
+							var badModPackMessage = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPackMalformed", Path.GetFileName(modListFilePath))) {
 								Width = { Percent = 1 },
 								Height = { Pixels = 50, Percent = 0 }
 							};
 							modListList.Add(badModPackMessage);
 						}
 					}
+
 					scrollPanel.RemoveChild(uiLoader);
 				}, TaskScheduler.FromCurrentSynchronizationContext());
 		}

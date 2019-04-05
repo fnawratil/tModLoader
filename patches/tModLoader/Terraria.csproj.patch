@@ -177,7 +177,7 @@
 +    <Compile Include="Terraria.ModLoader.IO\EntryReadStream.cs" />
 +    <Compile Include="Terraria.ModLoader.UI.Elements\FixedUIScrollbar.cs" />
 +    <Compile Include="Terraria.ModLoader.UI.Elements\UIGrid.cs" />
-+    <Compile Include="Terraria.ModLoader.UI\UIAutoScaleTextTextPanel.cs" />
++    <Compile Include="Terraria.ModLoader.UI\UIScalingTextPanel.cs" />
 +    <Compile Include="Terraria.ModLoader.UI\UIBuildMod.cs" />
 +    <Compile Include="Terraria.ModLoader.UI\UICommon.cs" />
 +    <Compile Include="Terraria.ModLoader.UI\UICreateMod.cs" />
@@ -343,7 +343,7 @@
 +    <EmbeddedResource Include="..\..\references\NVorbis.dll" />
 +    <EmbeddedResource Include="..\..\references\log4net.dll" />
 +    <EmbeddedResource Include="..\..\references\Mono.Cecil.dll" />
-+    <EmbeddedResource Include="..\..\references\Mono.Cecil.Mdb.dll" Condition="$(DefineConstants.Contains('MONO'))"/>
++    <EmbeddedResource Include="..\..\references\Mono.Cecil.Mdb.dll" Condition="$(DefineConstants.Contains('MONO'))" />
 +    <EmbeddedResource Include="..\..\references\MonoMod.RuntimeDetour.dll" />
 +    <EmbeddedResource Include="..\..\references\MonoMod.Utils.dll" />
 +    <EmbeddedResource Include="..\..\references\System.ValueTuple.dll" />

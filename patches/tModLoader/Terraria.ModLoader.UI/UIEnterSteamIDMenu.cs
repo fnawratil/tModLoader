@@ -17,7 +17,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnInitialize() {
 			var uIElement = new UIElement {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Top = { Pixels = 220 },
 				Height = { Pixels = -220, Percent = 1f },
 				HAlign = 0.5f
@@ -26,7 +26,7 @@ namespace Terraria.ModLoader.UI
 			var uIPanel = new UIPanel {
 				Width = { Percent = 1f },
 				Height = { Pixels = -110, Percent = 1f },
-				BackgroundColor = UICommon.mainPanelBackground,
+				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR,
 				PaddingTop = 0f
 			};
 			uIElement.Append(uIPanel);
@@ -34,7 +34,7 @@ namespace Terraria.ModLoader.UI
 			uITextPanel = new UITextPanel<string>(Language.GetTextValue("tModLoader.EnterSteamID"), 0.8f, true) {
 				HAlign = 0.5f,
 				Top = { Pixels = -35 },
-				BackgroundColor = UICommon.defaultUIBlue
+				BackgroundColor = UICommon.UI_BLUE_COLOR
 			}.WithPadding(15f);
 			uIElement.Append(uITextPanel);
 
@@ -94,9 +94,8 @@ namespace Terraria.ModLoader.UI
 		}
 
 		//TODO unused
-		private void OnTextChange(object sender, EventArgs e) {
-		}
-		
+		private void OnTextChange(object sender, EventArgs e) { }
+
 		//TODO unused
 		internal void SetGotoMenu(int gotoMenu) {
 			this.gotoMenu = gotoMenu;

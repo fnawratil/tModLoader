@@ -31,7 +31,7 @@ namespace Terraria.ModLoader.UI
 			var uIPanel = new UIPanel {
 				Width = { Percent = 1f },
 				Height = { Pixels = -110, Percent = 1f },
-				BackgroundColor = UICommon.mainPanelBackground
+				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR
 			};
 			area.Append(uIPanel);
 

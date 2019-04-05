@@ -20,7 +20,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnInitialize() {
 			loadProgress = new UILoadProgress {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Height = { Pixels = 150 },
 				HAlign = 0.5f,
 				VAlign = 0.5f,
@@ -33,14 +33,14 @@ namespace Terraria.ModLoader.UI
 			Main.menuMode = Interface.extractModID;
 			// I expect this will move out of Activate during progress UI merger
 			Task.Factory.StartNew(() => {
-				Interface.extractMod._Extract(); // Interface.extractMod is just `this`
-			}).ContinueWith(t => {
-				var exception = t?.Exception;//TODO can you even continue on an exceptional task?
-				if (exception != null)
-					Logging.tML.Error(Language.GetTextValue("tModLoader.ExtractErrorWhileExtractingMod", mod.Name), exception);
-				else
-					Main.menuMode = gotoMenu;
-			}, TaskScheduler.FromCurrentSynchronizationContext());
+				                      Interface.extractMod._Extract(); // Interface.extractMod is just `this`
+			                      }).ContinueWith(t => {
+				                                      var exception = t?.Exception; //TODO can you even continue on an exceptional task?
+				                                      if (exception != null)
+					                                      Logging.tML.Error(Language.GetTextValue("tModLoader.ExtractErrorWhileExtractingMod", mod.Name), exception);
+				                                      else
+					                                      Main.menuMode = gotoMenu;
+			                                      }, TaskScheduler.FromCurrentSynchronizationContext());
 		}
 
 		internal void Show(LocalMod mod, int gotoMenu) {
@@ -83,8 +83,8 @@ namespace Terraria.ModLoader.UI
 						continue;
 
 					bool hidden = codeExtensions.Contains(Path.GetExtension(name))
-						? mod.properties.hideCode
-						: mod.properties.hideResources;
+						              ? mod.properties.hideCode
+						              : mod.properties.hideResources;
 
 					if (hidden)
 						log.Write("[hidden] ");
@@ -102,7 +102,9 @@ namespace Terraria.ModLoader.UI
 						else
 							src.CopyTo(dst);
 					}
-				};
+				}
+
+				;
 			}
 			catch (Exception e) {
 				log?.WriteLine(e);
@@ -112,6 +114,7 @@ namespace Terraria.ModLoader.UI
 				log?.Close();
 				modHandle?.Dispose();
 			}
+
 			return null;
 		}
 	}

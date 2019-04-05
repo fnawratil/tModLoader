@@ -20,7 +20,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnInitialize() {
 			var area = new UIElement {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Top = { Pixels = 220 },
 				Height = { Pixels = -220, Percent = 1f },
 				HAlign = 0.5f
@@ -29,7 +29,7 @@ namespace Terraria.ModLoader.UI
 			var uIPanel = new UIPanel {
 				Width = { Percent = 1f },
 				Height = { Pixels = -110, Percent = 1f },
-				BackgroundColor = UICommon.mainPanelBackground
+				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR
 			};
 			area.Append(uIPanel);
 
@@ -50,7 +50,7 @@ namespace Terraria.ModLoader.UI
 			textPanel = new UITextPanel<string>(Language.GetTextValue("tModLoader.MBMyPublishedMods"), 0.8f, true) {
 				HAlign = 0.5f,
 				Top = { Pixels = -35 },
-				BackgroundColor = UICommon.defaultUIBlue
+				BackgroundColor = UICommon.UI_BLUE_COLOR
 			}.WithPadding(15);
 			area.Append(textPanel);
 
@@ -84,8 +84,7 @@ namespace Terraria.ModLoader.UI
 			try {
 				ServicePointManager.Expect100Continue = false;
 				string url = "http://javid.ddns.net/tModLoader/listmymods.php";
-				var values = new NameValueCollection
-				{
+				var values = new NameValueCollection {
 					{ "steamid64", ModLoader.SteamID64 },
 					{ "modloaderversion", ModLoader.versionedName },
 					{ "passphrase", ModLoader.modBrowserPassphrase },
@@ -98,6 +97,7 @@ namespace Terraria.ModLoader.UI
 					textPanel.SetText(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", Language.GetTextValue("tModLoader.MBBusy")), 0.8f, true);
 					return;
 				}
+
 				textPanel.SetText(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", ""), 0.8f, true);
 				return;
 			}
@@ -105,19 +105,18 @@ namespace Terraria.ModLoader.UI
 				UIModBrowser.LogModBrowserException(e);
 				return;
 			}
+
 			try {
 				var a = JArray.Parse(response);
 
 				foreach (JObject o in a.Children<JObject>()) {
-					var modItem = new UIModManageItem(
-						(string)o["displayname"],
-						(string)o["name"],
-						(string)o["version"],
-						(string)o["author"],
-						(string)o["downloads"],
-						(string)o["downloadsversion"],
-						(string)o["modloaderversion"]
-					);
+					var modItem = new UIModManageItem((string)o["displayname"],
+													  (string)o["name"],
+													  (string)o["version"],
+													  (string)o["author"],
+													  (string)o["downloads"],
+													  (string)o["downloadsversion"],
+													  (string)o["modloaderversion"]);
 					myPublishedMods.Add(modItem);
 				}
 			}

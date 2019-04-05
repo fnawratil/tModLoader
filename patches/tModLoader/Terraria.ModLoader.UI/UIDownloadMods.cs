@@ -15,24 +15,24 @@ namespace Terraria.ModLoader.UI
 	//TODO: merge all progress/download UIs
 	internal class UIDownloadMods : UIState
 	{
-		private UILoadProgress loadProgress;
-		private string name;
-		private Action cancelAction;
-		private Queue<UIModDownloadItem> modsToDownload = new Queue<UIModDownloadItem>();
-		private List<string> missingMods = new List<string>();
-		private WebClient client;
-		private UIModDownloadItem currentDownload;
+		private UILoadProgress _loadProgress;
+		private string _name;
+		private Action _cancelAction;
+		private readonly Queue<UIModDownloadItem> _modsToDownload = new Queue<UIModDownloadItem>();
+		private readonly List<string> _missingMods = new List<string>();
+		private WebClient _client;
+		private UIModDownloadItem _currentDownload;
 
 		public override void OnInitialize() {
-			loadProgress = new UILoadProgress {
+			_loadProgress = new UILoadProgress {
 				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MaxPanelWidth,
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Height = { Pixels = 150 },
 				HAlign = 0.5f,
 				VAlign = 0.5f,
 				Top = { Pixels = 10 }
 			};
-			Append(loadProgress);
+			Append(_loadProgress);
 
 			var cancel = new UITextPanel<string>(Language.GetTextValue("UI.Cancel"), 0.75f, true) {
 				VAlign = 0.5f,
@@ -44,27 +44,28 @@ namespace Terraria.ModLoader.UI
 		}
 
 		public override void OnActivate() {
-			loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", name + ": ???"));
-			loadProgress.SetProgress(0f);
+			_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", _name + ": ???"));
+			_loadProgress.SetProgress(0f);
 			if (UIModBrowser.PlatformSupportsTls12) // Needed for downloads from Github
 			{
 				ServicePointManager.SecurityProtocol |= (SecurityProtocolType)3072; // SecurityProtocolType.Tls12
 			}
-			if (modsToDownload != null && modsToDownload.Count > 0) {
-				client = new WebClient();
-				ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => { return true; });
-				SetCancel(client.CancelAsync);
-				client.DownloadProgressChanged += Client_DownloadProgressChanged;
-				client.DownloadFileCompleted += Client_DownloadFileCompleted;
-				currentDownload = modsToDownload.Dequeue();
-				loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", $"{name}: {currentDownload.displayname}"));
-				client.DownloadFileAsync(new Uri(currentDownload.download), ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod");
+
+			if (_modsToDownload != null && _modsToDownload.Count > 0) {
+				_client = new WebClient();
+				ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, policyErrors) => true;
+				SetCancel(_client.CancelAsync);
+				_client.DownloadProgressChanged += Client_DownloadProgressChanged;
+				_client.DownloadFileCompleted += Client_DownloadFileCompleted;
+				_currentDownload = _modsToDownload.Dequeue();
+				_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", $"{_name}: {_currentDownload.displayname}"));
+				_client.DownloadFileAsync(new Uri(_currentDownload.download), ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod");
 			}
 			else {
 				Interface.modBrowser.ClearItems();
 				Main.menuMode = Interface.modBrowserID;
-				if (missingMods.Count > 0) {
-					Interface.infoMessage.Show(Language.GetTextValue("tModLoader.MBModsNotFoundOnline", String.Join(",", missingMods)), Interface.modBrowserID);
+				if (_missingMods.Count > 0) {
+					Interface.infoMessage.Show(Language.GetTextValue("tModLoader.MBModsNotFoundOnline", string.Join(",", _missingMods)), Interface.modBrowserID);
 				}
 			}
 		}
@@ -84,44 +85,47 @@ namespace Terraria.ModLoader.UI
 				}
 				else {
 					var errorKey = GetHttpStatusCode(e.Error) == HttpStatusCode.ServiceUnavailable ? "MBExceededBandwidth" : "MBUnknownMBError";
-					Interface.errorMessage.Show(Language.GetTextValue("tModLoader."+errorKey), 0);
+					Interface.errorMessage.Show(Language.GetTextValue("tModLoader." + errorKey), 0);
 				}
+
 				File.Delete(ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod");
 			}
 			else if (!e.Cancelled) {
 				// Downloaded OK
-				var mod = ModLoader.GetMod(currentDownload.mod);
+				var mod = ModLoader.GetMod(_currentDownload.mod);
 				if (mod != null) {
 					mod.File?.Close(); // if the mod is currently loaded, the file-handle needs to be released
 					Interface.modBrowser.anEnabledModDownloaded = true;
 				}
+
 				//string destinationFileName = ModLoader.GetMod(currentDownload.mod) == null ? currentDownload.mod + ".tmod" : currentDownload.mod + ".tmod.update"; // if above fix has issues we can use this.
-				File.Copy(ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod", ModLoader.ModPath + Path.DirectorySeparatorChar + currentDownload.mod + ".tmod", true);
+				File.Copy(ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod", ModLoader.ModPath + Path.DirectorySeparatorChar + _currentDownload.mod + ".tmod", true);
 				File.Delete(ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod");
-				if (!currentDownload.update) {
+				if (!_currentDownload.update) {
 					Interface.modBrowser.aNewModDownloaded = true;
 				}
 				else {
 					Interface.modBrowser.aModUpdated = true;
 				}
+
 				if (ModLoader.autoReloadAndEnableModsLeavingModBrowser) {
-					ModLoader.EnableMod(currentDownload.mod);
+					ModLoader.EnableMod(_currentDownload.mod);
 				}
 
 				// Start next download
-				if (modsToDownload.Count != 0) {
-					currentDownload = modsToDownload.Dequeue();
-					loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", $"{name}: {currentDownload.displayname}"));
-					loadProgress.SetProgress(0f);
-					client.DownloadFileAsync(new Uri(currentDownload.download), ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod");
+				if (_modsToDownload.Count != 0) {
+					_currentDownload = _modsToDownload.Dequeue();
+					_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", $"{_name}: {_currentDownload.displayname}"));
+					_loadProgress.SetProgress(0f);
+					_client.DownloadFileAsync(new Uri(_currentDownload.download), ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod");
 				}
 				else {
-					client.Dispose();
-					client = null;
+					_client.Dispose();
+					_client = null;
 					Interface.modBrowser.ClearItems();
 					Main.menuMode = Interface.modBrowserID;
-					if (missingMods.Count > 0) {
-						Interface.infoMessage.Show(Language.GetTextValue("tModLoader.MBModsNotFoundOnline", String.Join(",", missingMods)), Interface.modsMenuID);
+					if (_missingMods.Count > 0) {
+						Interface.infoMessage.Show(Language.GetTextValue("tModLoader.MBModsNotFoundOnline", string.Join(",", _missingMods)), Interface.modsMenuID);
 					}
 				}
 			}
@@ -135,51 +139,49 @@ namespace Terraria.ModLoader.UI
 		}
 
 		internal void SetDownloading(string name) {
-			this.name = name;
+			_name = name;
 		}
 
 		public void SetCancel(Action cancelAction) {
-			this.cancelAction = cancelAction;
+			_cancelAction = cancelAction;
 		}
 
 		internal void SetProgress(DownloadProgressChangedEventArgs e) => SetProgress(e.BytesReceived, e.TotalBytesToReceive);
+
 		internal void SetProgress(long count, long len) {
 			//loadProgress?.SetText("Downloading: " + name + " -- " + count+"/" + len);
-			loadProgress?.SetProgress((float)count / len);
+			_loadProgress?.SetProgress((float)count / len);
 		}
 
 		private void CancelClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(SoundID.MenuOpen);
-			cancelAction?.Invoke();
+			_cancelAction?.Invoke();
 		}
 
 		internal void SetModsToDownload(List<string> specialModPackFilter, List<UIModDownloadItem> items) {
-			modsToDownload.Clear();
-			missingMods.Clear();
+			_modsToDownload.Clear();
+			_missingMods.Clear();
 			foreach (var desiredMod in specialModPackFilter) {
-				var mod = items.FirstOrDefault(x => x.mod == desiredMod) ?? null;
+				var mod = items.FirstOrDefault(x => x.mod == desiredMod);
 				if (mod == null) {
-					missingMods.Add(desiredMod);
+					_missingMods.Add(desiredMod);
 				}
 				else {
 					if (mod.installed != null && !mod.update) {
 						// skip mods that are already installed and don't have an update
 					}
 					else {
-						modsToDownload.Enqueue(mod);
+						_modsToDownload.Enqueue(mod);
 					}
 				}
 			}
 		}
 
-		private HttpStatusCode GetHttpStatusCode(System.Exception err) {
-			if (err is WebException) {
-				WebException we = (WebException)err;
-				if (we.Response is HttpWebResponse) {
-					HttpWebResponse response = (HttpWebResponse)we.Response;
-					return response.StatusCode;
-				}
+		private HttpStatusCode GetHttpStatusCode(Exception err) {
+			if (err is WebException we && we.Response is HttpWebResponse response) {
+				return response.StatusCode;
 			}
+
 			return 0;
 		}
 	}

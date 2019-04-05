@@ -37,29 +37,27 @@ namespace Terraria.ModLoader.UI
 			CalculatedStyle dimensions = base.GetDimensions();
 			// Draw BG
 			if (withBackground) {
-				spriteBatch.Draw(
-					backgroundTexture,
-					new Vector2((int)dimensions.X, (int)dimensions.Y),
-					new Rectangle(0, 0, 200, 200),
-					Color.White,
-					0f,
-					new Vector2(0, 0),
-					scale,
-					SpriteEffects.None,
-					0.0f);
+				spriteBatch.Draw(backgroundTexture,
+								 new Vector2((int)dimensions.X, (int)dimensions.Y),
+								 new Rectangle(0, 0, 200, 200),
+								 Color.White,
+								 0f,
+								 new Vector2(0, 0),
+								 scale,
+								 SpriteEffects.None,
+								 0.0f);
 			}
 
 			// Draw loader animation
-			spriteBatch.Draw(
-				loaderTexture,
-				new Vector2((int)dimensions.X, (int)dimensions.Y),
-				new Rectangle(200 * (frame / 8), 200 * (frame % 8), 200, 200),
-				Color.White,
-				0f,
-				new Vector2(0, 0),
-				scale,
-				SpriteEffects.None,
-				0.0f);
+			spriteBatch.Draw(loaderTexture,
+							 new Vector2((int)dimensions.X, (int)dimensions.Y),
+							 new Rectangle(200 * (frame / 8), 200 * (frame % 8), 200, 200),
+							 Color.White,
+							 0f,
+							 new Vector2(0, 0),
+							 scale,
+							 SpriteEffects.None,
+							 0.0f);
 		}
 	}
 }

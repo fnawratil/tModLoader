@@ -39,7 +39,7 @@ namespace Terraria.ModLoader.UI
 			};
 			Append(modName);
 
-			var button = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.MSBuild")) {
+			var button = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.MSBuild")) {
 				Width = { Pixels = 100 },
 				Height = { Pixels = 36 },
 				Left = { Pixels = 10 },
@@ -50,7 +50,7 @@ namespace Terraria.ModLoader.UI
 			button.OnClick += BuildMod;
 			Append(button);
 
-			var button2 = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.MSBuildReload"));
+			var button2 = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.MSBuildReload"));
 			button2.CopyStyle(button);
 			button2.Width.Pixels = 200;
 			button2.Left.Pixels = 150;
@@ -60,7 +60,7 @@ namespace Terraria.ModLoader.UI
 
 			this.builtMod = builtMod;
 			if (builtMod != null) {
-				var button3 = new UIAutoScaleTextTextPanel<string>(Language.GetTextValue("tModLoader.MSPublish"));
+				var button3 = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.MSPublish"));
 				button3.CopyStyle(button2);
 				button3.Width.Pixels = 100;
 				button3.Left.Pixels = 390;
@@ -68,6 +68,7 @@ namespace Terraria.ModLoader.UI
 				button3.OnClick += this.Publish;
 				Append(button3);
 			}
+
 			OnDoubleClick += BuildAndReload;
 		}
 
@@ -80,7 +81,7 @@ namespace Terraria.ModLoader.UI
 
 		public override void MouseOver(UIMouseEvent evt) {
 			base.MouseOver(evt);
-			this.BackgroundColor = UICommon.defaultUIBlue;
+			this.BackgroundColor = UICommon.UI_BLUE_COLOR;
 			this.BorderColor = new Color(89, 116, 213);
 		}
 
@@ -95,6 +96,7 @@ namespace Terraria.ModLoader.UI
 			if (uIModSourceItem == null) {
 				return base.CompareTo(obj);
 			}
+
 			if (uIModSourceItem.builtMod == null && builtMod == null)
 				return modName.Text.CompareTo(uIModSourceItem.modName.Text);
 			if (uIModSourceItem.builtMod == null)
@@ -126,6 +128,7 @@ namespace Terraria.ModLoader.UI
 				Interface.enterPassphraseMenu.SetGotoMenu(Interface.modSourcesID);
 				return;
 			}
+
 			Main.PlaySound(10);
 			try {
 				var modFile = builtMod.modFile;
@@ -145,21 +148,21 @@ namespace Terraria.ModLoader.UI
 						Content = modFile.GetBytes("icon.png")
 					});
 				}
+
 				if (bp.beta)
 					throw new WebException(Language.GetTextValue("tModLoader.BetaModCantPublishError"));
 				if (bp.buildVersion != modFile.tModLoaderVersion)
 					throw new WebException(Language.GetTextValue("OutdatedModCantPublishError.BetaModCantPublishError"));
 
-				var values = new NameValueCollection
-				{
+				var values = new NameValueCollection {
 					{ "displayname", bp.displayName },
 					{ "name", modFile.name },
-					{ "version", "v"+bp.version },
+					{ "version", "v" + bp.version },
 					{ "author", bp.author },
 					{ "homepage", bp.homepage },
 					{ "description", bp.description },
 					{ "steamid64", ModLoader.SteamID64 },
-					{ "modloaderversion", "tModLoader v"+modFile.tModLoaderVersion },
+					{ "modloaderversion", "tModLoader v" + modFile.tModLoaderVersion },
 					{ "passphrase", ModLoader.modBrowserPassphrase },
 					{ "modreferences", String.Join(", ", bp.modReferences.Select(x => x.mod)) },
 					{ "modside", bp.side.ToFriendlyString() },
@@ -186,6 +189,7 @@ namespace Terraria.ModLoader.UI
 					byte[] data = UploadFile.GetUploadFilesRequestData(files, values);
 					client.UploadDataAsync(new Uri(url), data);
 				}
+
 				Main.menuMode = Interface.uploadModID;
 			}
 			catch (WebException e) {
@@ -199,9 +203,11 @@ namespace Terraria.ModLoader.UI
 					Main.menuMode = Interface.modSourcesID;
 					return;
 				}
+
 				UIModBrowser.LogModBrowserException(e.Error);
 				return;
 			}
+
 			var result = e.Result;
 			int responseLength = result.Length;
 			if (result.Length > 256 && result[result.Length - 256 - 1] == '~') {
@@ -214,8 +220,10 @@ namespace Terraria.ModLoader.UI
 					if (fileStream.Length - fileStream.Position > 256) // Extrememly basic check in case ReadString errors?
 						fileWriter.Write(result, result.Length - 256, 256);
 				}
+
 				responseLength -= 257;
 			}
+
 			string response = Encoding.UTF8.GetString(result, 0, responseLength);
 			UIModBrowser.LogModPublishInfo(response);
 		}
