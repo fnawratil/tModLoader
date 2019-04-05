@@ -8,11 +8,14 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UILoadMods : UIState
 	{
-		private UILoadProgress loadProgress;
-		private UIText subProgress;
+		public int modCount;
+
+		private string _stageText;
+		private UILoadProgress _loadProgress;
+		private UIText _subProgress;
 
 		public override void OnInitialize() {
-			loadProgress = new UILoadProgress {
+			_loadProgress = new UILoadProgress {
 				Width = { Percent = 0.8f },
 				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Height = { Pixels = 150 },
@@ -20,14 +23,14 @@ namespace Terraria.ModLoader.UI
 				VAlign = 0.5f,
 				Top = { Pixels = 10 }
 			};
-			Append(loadProgress);
+			Append(_loadProgress);
 
-			subProgress = new UIText("", 0.5f, true) {
+			_subProgress = new UIText("", 0.5f, true) {
 				Top = { Pixels = 65 },
 				HAlign = 0.5f,
 				VAlign = 0.5f
 			};
-			Append(subProgress);
+			Append(_subProgress);
 		}
 
 		public override void OnActivate() {
@@ -45,19 +48,16 @@ namespace Terraria.ModLoader.UI
 		}
 
 		public string SubProgressText {
-			set => subProgress?.SetText(value);
+			set => _subProgress?.SetText(value);
 		}
 
-		public int modCount;
-		private string stageText;
-
 		public void SetLoadStage(string stageText, int modCount = -1) {
-			this.stageText = stageText;
+			_stageText = stageText;
 			this.modCount = modCount;
 			if (modCount < 0)
 				SetProgressText(Language.GetTextValue(stageText));
 
-			loadProgress?.SetProgress(0);
+			_loadProgress?.SetProgress(0);
 			SubProgressText = "";
 		}
 
@@ -66,12 +66,12 @@ namespace Terraria.ModLoader.UI
 			if (Main.dedServ)
 				Console.WriteLine(text);
 			else
-				loadProgress.SetText(text);
+				_loadProgress.SetText(text);
 		}
 
 		public void SetCurrentMod(int i, string mod) {
-			SetProgressText(Language.GetTextValue(stageText, mod));
-			loadProgress?.SetProgress(i / (float)modCount);
+			SetProgressText(Language.GetTextValue(_stageText, mod));
+			_loadProgress?.SetProgress(i / (float)modCount);
 		}
 	}
 }

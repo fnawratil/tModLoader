@@ -183,7 +183,7 @@ namespace Terraria.ModLoader
 
 			Interface.updateMessage.SetMessage(msg);
 			Interface.updateMessage.SetGotoMenu(0);
-			Interface.updateMessage.SetURL("https://www.microsoft.com/net/download/thank-you/net472");
+			Interface.updateMessage.SetUrl("https://www.microsoft.com/net/download/thank-you/net472");
 			Main.menuMode = Interface.updateMessageID;
 			return false;
 		}
@@ -249,7 +249,7 @@ namespace Terraria.ModLoader
 			else {
 				Interface.errorMessage.Show(msg,
 					gotoMenu: fatal ? -1 : Interface.reloadModsID,
-					webHelpURL: e.HelpLink,
+					webHelpUrl: e.HelpLink,
 					showRetry: continueIsRetry,
 					showSkip: !fatal);
 			}

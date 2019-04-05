@@ -21,42 +21,41 @@ namespace Terraria.ModLoader.UI
 	internal class UIModDownloadItem : UIPanel
 	{
 		public string mod;
-		public string displayname;
+		public string displayName;
 		public string version;
 		public string author;
-		public string modIconURL;
-		private bool modIconWanted;
-		private bool modIconRequested;
-		private bool modIconReady;
-		private bool modIconAppended; // mod icon was ready, and is now appended
+		public string modIconUrl;
 		public string download;
 		public string timeStamp;
 		public string modreferences;
 		public ModSide modside;
 		public int downloads;
 		public int hot;
-		private readonly Texture2D dividerTexture;
-		private readonly Texture2D innerPanelTexture;
-		private readonly UIText modName;
-		private readonly UIScalingTextPanel<string> updateButton;
-		private readonly UIScalingTextPanel<string> moreInfoButton;
-		private UIImage modIcon;
-		public bool update = false;
-		public bool updateIsDowngrade = false;
+		public bool update;
+		public bool updateIsDowngrade;
 		public LocalMod installed;
-		private float left;
 
-		private bool HasModIcon => modIconURL != null;
-		private float ModIconAdjust => modIconAppended ? 85f : 0f;
+		private UIImage _modIcon;
+		private bool _modIconWanted;
+		private bool _modIconRequested;
+		private bool _modIconReady;
+		private bool _modIconAppended; // mod icon was ready, and is now appended
+		private bool HasModIcon => modIconUrl != null;
+		private float ModIconAdjust => _modIconAppended ? 85f : 0f;
+		private readonly Texture2D _dividerTexture;
+		private readonly Texture2D _innerPanelTexture;
+		private readonly UIText _modName;
+		private readonly UIScalingTextPanel<string> _updateButton;
+		private readonly UIScalingTextPanel<string> _moreInfoButton;
 
-		public UIModDownloadItem(string displayname, string name, string version, string author, string modreferences, ModSide modside, string modIconURL, string download, int downloads, int hot, string timeStamp, bool update, bool updateIsDowngrade, LocalMod installed) {
-			this.displayname = displayname;
+		public UIModDownloadItem(string displayName, string name, string version, string author, string modreferences, ModSide modside, string modIconUrl, string download, int downloads, int hot, string timeStamp, bool update, bool updateIsDowngrade, LocalMod installed) {
+			this.displayName = displayName;
 			this.mod = name;
 			this.version = version;
 			this.author = author;
 			this.modreferences = modreferences;
 			this.modside = modside;
-			this.modIconURL = modIconURL;
+			this.modIconUrl = modIconUrl;
 			this.download = download;
 			this.downloads = downloads;
 			this.hot = hot;
@@ -66,40 +65,40 @@ namespace Terraria.ModLoader.UI
 			this.installed = installed;
 
 			BorderColor = new Color(89, 116, 213) * 0.7f;
-			dividerTexture = TextureManager.Load("Images/UI/Divider");
-			innerPanelTexture = TextureManager.Load("Images/UI/InnerPanelBackground");
+			_dividerTexture = TextureManager.Load("Images/UI/Divider");
+			_innerPanelTexture = TextureManager.Load("Images/UI/InnerPanelBackground");
 			Height.Pixels = 90;
 			Width.Percent = 1f;
 			SetPadding(6f);
 
-			left = HasModIcon ? 85f : 0f;
-			string text = displayname + " " + version;
-			modName = new UIText(text) {
+			float left = HasModIcon ? 85f : 0f;
+			string text = displayName + " " + version;
+			_modName = new UIText(text) {
 				Left = new StyleDimension(left + 5, 0f),
 				Top = { Pixels = 5 }
 			};
-			Append(modName);
+			Append(_modName);
 
-			moreInfoButton = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModsMoreInfo")) {
+			_moreInfoButton = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModsMoreInfo")) {
 				Width = { Pixels = 100 },
 				Height = { Pixels = 36 },
 				Left = { Pixels = left },
 				Top = { Pixels = 40 }
 			}.WithFadedMouseOver();
-			moreInfoButton.PaddingTop -= 2f;
-			moreInfoButton.PaddingBottom -= 2f;
-			moreInfoButton.OnClick += RequestMoreinfo;
-			Append(moreInfoButton);
+			_moreInfoButton.PaddingTop -= 2f;
+			_moreInfoButton.PaddingBottom -= 2f;
+			_moreInfoButton.OnClick += RequestMoreinfo;
+			Append(_moreInfoButton);
 
 			if (update || installed == null) {
-				updateButton = new UIScalingTextPanel<string>(this.update ? (updateIsDowngrade ? Language.GetTextValue("tModLoader.MBDowngrade") : Language.GetTextValue("tModLoader.MBUpdate")) : Language.GetTextValue("tModLoader.MBDownload"), 1f,
-															  false);
-				updateButton.CopyStyle(moreInfoButton);
-				updateButton.Width.Pixels = HasModIcon ? 120 : 200;
-				updateButton.Left.Pixels = moreInfoButton.Width.Pixels + moreInfoButton.Left.Pixels + 5f;
-				updateButton.WithFadedMouseOver();
-				updateButton.OnClick += DownloadMod;
-				Append(updateButton);
+				_updateButton = new UIScalingTextPanel<string>(this.update ? (updateIsDowngrade ? Language.GetTextValue("tModLoader.MBDowngrade") : Language.GetTextValue("tModLoader.MBUpdate")) : Language.GetTextValue("tModLoader.MBDownload"), 1f,
+															   false);
+				_updateButton.CopyStyle(_moreInfoButton);
+				_updateButton.Width.Pixels = HasModIcon ? 120 : 200;
+				_updateButton.Left.Pixels = _moreInfoButton.Width.Pixels + _moreInfoButton.Left.Pixels + 5f;
+				_updateButton.WithFadedMouseOver();
+				_updateButton.OnClick += DownloadMod;
+				Append(_updateButton);
 			}
 
 			if (modreferences.Length > 0) {
@@ -129,9 +128,9 @@ namespace Terraria.ModLoader.UI
 				default:
 					return base.CompareTo(obj);
 				case ModBrowserSortMode.DisplayNameAtoZ:
-					return string.Compare(this.displayname, item?.displayname, StringComparison.Ordinal);
+					return string.Compare(this.displayName, item?.displayName, StringComparison.Ordinal);
 				case ModBrowserSortMode.DisplayNameZtoA:
-					return -1 * string.Compare(this.displayname, item?.displayname, StringComparison.Ordinal);
+					return -1 * string.Compare(this.displayName, item?.displayName, StringComparison.Ordinal);
 				case ModBrowserSortMode.DownloadsAscending:
 					return this.downloads.CompareTo(item?.downloads);
 				case ModBrowserSortMode.DownloadsDescending:
@@ -155,7 +154,7 @@ namespace Terraria.ModLoader.UI
 					}
 				}
 				else {
-					if (displayname.IndexOf(Interface.modBrowser.filter, StringComparison.OrdinalIgnoreCase) == -1 && mod.IndexOf(Interface.modBrowser.filter, StringComparison.OrdinalIgnoreCase) == -1) {
+					if (displayName.IndexOf(Interface.modBrowser.filter, StringComparison.OrdinalIgnoreCase) == -1 && mod.IndexOf(Interface.modBrowser.filter, StringComparison.OrdinalIgnoreCase) == -1) {
 						return false;
 					}
 				}
@@ -180,14 +179,16 @@ namespace Terraria.ModLoader.UI
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			base.DrawSelf(spriteBatch);
 
-			if (HasModIcon && !modIconWanted) {
-				modIconWanted = true;
+			if (HasModIcon && !_modIconWanted) {
+				_modIconWanted = true;
 			}
 
 			CalculatedStyle innerDimensions = GetInnerDimensions();
 			//draw divider
 			Vector2 drawPos = new Vector2(innerDimensions.X + 5f + ModIconAdjust, innerDimensions.Y + 30f);
-			spriteBatch.Draw(this.dividerTexture, drawPos, null, Color.White, 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f - ModIconAdjust) / 8f, 1f), SpriteEffects.None, 0f);
+			spriteBatch.Draw(this._dividerTexture, drawPos, null, Color.White,
+							 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f - ModIconAdjust) / 8f, 1f), SpriteEffects.None,
+							 0f);
 			// change pos for button
 			const int baseWidth = 125; // something like 1 days ago is ~110px, XX minutes ago is ~120 px (longest)
 			drawPos = new Vector2(innerDimensions.X + innerDimensions.Width - baseWidth, innerDimensions.Y + 45);
@@ -197,18 +198,18 @@ namespace Terraria.ModLoader.UI
 
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime);
-			if (modIconWanted && !modIconRequested) {
-				modIconRequested = true;
+			if (_modIconWanted && !_modIconRequested) {
+				_modIconRequested = true;
 				using (var client = new WebClient()) {
 					client.DownloadDataCompleted += IconDownloadComplete;
-					client.DownloadDataAsync(new Uri(modIconURL));
+					client.DownloadDataAsync(new Uri(modIconUrl));
 				}
 			}
 
-			if (modIconReady) {
-				modIconReady = false;
-				modIconAppended = true;
-				Append(modIcon);
+			if (_modIconReady) {
+				_modIconReady = false;
+				_modIconAppended = true;
+				Append(_modIcon);
 			}
 		}
 
@@ -217,21 +218,21 @@ namespace Terraria.ModLoader.UI
 				byte[] data = e.Result;
 				using (var buffer = new MemoryStream(data)) {
 					var iconTexture = Texture2D.FromStream(Main.instance.GraphicsDevice, buffer);
-					modIcon = new UIImage(iconTexture) {
+					_modIcon = new UIImage(iconTexture) {
 						Left = { Percent = 0f },
 						Top = { Percent = 0f }
 					};
-					modIconReady = true; // We'd like to avoid collection modified exceptions
-					modIconWanted = false; // We got the icon, no longer wanted
+					_modIconReady = true; // We'd like to avoid collection modified exceptions
+					_modIconWanted = false; // We got the icon, no longer wanted
 				}
 			}
 			catch (Exception) {
 				// country- wide imgur blocks, cannot load icon
-				modIconReady = false;
-				modIconWanted = false;
-				modName.Left.Set(5f, 0f);
-				moreInfoButton.Left.Set(0f, 0f);
-				updateButton.Left.Set(moreInfoButton.Width.Pixels + 5f, 0f);
+				_modIconReady = false;
+				_modIconWanted = false;
+				_modName.Left.Set(5f, 0f);
+				_moreInfoButton.Left.Set(0f, 0f);
+				_updateButton.Left.Set(_moreInfoButton.Width.Pixels + 5f, 0f);
 			}
 		}
 
@@ -240,16 +241,18 @@ namespace Terraria.ModLoader.UI
 
 			// show authors on mod title hover, after everything else
 			// main.hoverItemName isn't drawn in UI
-			if (modName.IsMouseHovering) {
+			if (_modName.IsMouseHovering) {
 				string text = Language.GetTextValue("tModLoader.ModsByline", author);
 				UICommon.DrawHoverStringInBounds(spriteBatch, text);
 			}
 		}
 
 		private void DrawPanel(SpriteBatch spriteBatch, Vector2 position, float width) {
-			spriteBatch.Draw(innerPanelTexture, position, new Rectangle?(new Rectangle(0, 0, 8, innerPanelTexture.Height)), Color.White);
-			spriteBatch.Draw(innerPanelTexture, new Vector2(position.X + 8f, position.Y), new Rectangle?(new Rectangle(8, 0, 8, innerPanelTexture.Height)), Color.White, 0f, Vector2.Zero, new Vector2((width - 16f) / 8f, 1f), SpriteEffects.None, 0f);
-			spriteBatch.Draw(innerPanelTexture, new Vector2(position.X + width - 8f, position.Y), new Rectangle?(new Rectangle(16, 0, 8, innerPanelTexture.Height)), Color.White);
+			spriteBatch.Draw(_innerPanelTexture, position, new Rectangle?(new Rectangle(0, 0, 8, _innerPanelTexture.Height)), Color.White);
+			spriteBatch.Draw(_innerPanelTexture, new Vector2(position.X + 8f, position.Y), new Rectangle?(new Rectangle(8, 0, 8, _innerPanelTexture.Height)), Color.White,
+							 0f, Vector2.Zero, new Vector2((width - 16f) / 8f, 1f), SpriteEffects.None,
+							 0f);
+			spriteBatch.Draw(_innerPanelTexture, new Vector2(position.X + width - 8f, position.Y), new Rectangle?(new Rectangle(16, 0, 8, _innerPanelTexture.Height)), Color.White);
 		}
 
 		private void DrawTimeText(SpriteBatch spriteBatch, Vector2 drawPos, int baseWidth) {
@@ -258,12 +261,13 @@ namespace Terraria.ModLoader.UI
 			}
 
 			try {
-				var MyDateTime = DateTime.Parse(timeStamp); // parse date
-				string text = TimeHelper.HumanTimeSpanString(MyDateTime); // get time text
+				var myDateTime = DateTime.Parse(timeStamp); // parse date
+				string text = TimeHelper.HumanTimeSpanString(myDateTime); // get time text
 				int textWidth = (int)Main.fontMouseText.MeasureString(text).X; // measure text width
 				int diffWidth = baseWidth - textWidth; // get difference
 				drawPos.X += diffWidth * 0.5f; // add difference as padding
-				Utils.DrawBorderString(spriteBatch, text, drawPos, Color.White, 1f, 0f, 0f, -1);
+				Utils.DrawBorderString(spriteBatch, text, drawPos, Color.White,
+									   1f, 0f, 0f, -1);
 			}
 			catch { }
 		}
@@ -318,11 +322,11 @@ namespace Terraria.ModLoader.UI
 				homepage = (string)joResponse["homepage"];
 			}
 
-			Interface.modInfo.SetModName(displayname);
+			Interface.modInfo.SetModName(displayName);
 			Interface.modInfo.SetModInfo(description);
 			Interface.modInfo.SetMod(installed);
 			Interface.modInfo.SetGotoMenu(Interface.modBrowserID);
-			Interface.modInfo.SetURL(homepage);
+			Interface.modInfo.SetUrl(homepage);
 			Main.menuMode = Interface.modInfoID;
 		}
 	}
@@ -365,10 +369,9 @@ namespace Terraria.ModLoader.UI
 				int months = Convert.ToInt32(Math.Floor((double)ts.Days / 30));
 				return months <= 1 ? Language.GetTextValue("tModLoader.1MonthAgo") : Language.GetTextValue("tModLoader.XMonthsAgo", months);
 			}
-			else {
-				int years = Convert.ToInt32(Math.Floor((double)ts.Days / 365));
-				return years <= 1 ? Language.GetTextValue("tModLoader.1YearAgo") : Language.GetTextValue("tModLoader.XYearsAgo", years);
-			}
+
+			int years = Convert.ToInt32(Math.Floor((double)ts.Days / 365));
+			return years <= 1 ? Language.GetTextValue("tModLoader.1YearAgo") : Language.GetTextValue("tModLoader.XYearsAgo", years);
 		}
 	}
 }

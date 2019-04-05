@@ -131,14 +131,14 @@ namespace Terraria.ModLoader.UI
 			string file = Path.Combine(ModCompile.modCompileDir, $"ModCompile_{ModLoader.versionedName}.zip");
 			Directory.CreateDirectory(ModCompile.modCompileDir);
 			DownloadFile("ModCompile", url, file, () => {
-				                                      Extract(file);
-				                                      var currentExeFilename = Process.GetCurrentProcess().ProcessName;
-				                                      string originalXmlFile = Path.Combine(ModCompile.modCompileDir, "Terraria.xml");
-				                                      // TODO can throw exception, not caught
-				                                      string correctXmlFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{currentExeFilename}.xml");
-				                                      File.Copy(originalXmlFile, correctXmlFile, true);
-				                                      File.Delete(originalXmlFile);
-			                                      });
+				Extract(file);
+				var currentExeFilename = Process.GetCurrentProcess().ProcessName;
+				string originalXmlFile = Path.Combine(ModCompile.modCompileDir, "Terraria.xml");
+				// TODO can throw exception, not caught
+				string correctXmlFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), $"{currentExeFilename}.xml");
+				File.Copy(originalXmlFile, correctXmlFile, true);
+				File.Delete(originalXmlFile);
+			});
 		}
 
 		private void DirectDownloadRefAssemblies() {

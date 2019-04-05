@@ -3,24 +3,29 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Reflection;
 using Terraria.UI;
 
-
 namespace Terraria.ModLoader.UI
 {
 	internal sealed class UILoaderAnimatedImage : UIElement
 	{
+		public const int MAX_FRAMES = 16;
+		public const int MAX_DELAY = 5;
+
 		public bool withBackground = false;
-		public int frameTick = 0;
-		public int frame = 0;
-		private float scale;
-		public const int maxFrames = 16;
-		public const int maxDelay = 5;
-		private readonly Texture2D backgroundTexture;
-		private readonly Texture2D loaderTexture;
+		public int frameTick;
+		public int frame;
+
+		private readonly float _scale;
+		private readonly Texture2D _backgroundTexture;
+		private readonly Texture2D _loaderTexture;
 
 		public UILoaderAnimatedImage(float left, float top, float scale = 1f) {
-			backgroundTexture = Texture2D.FromStream(Main.instance.GraphicsDevice, Assembly.GetExecutingAssembly().GetManifestResourceStream("Terraria.ModLoader.UI.LoaderBG.png"));
-			loaderTexture = Texture2D.FromStream(Main.instance.GraphicsDevice, Assembly.GetExecutingAssembly().GetManifestResourceStream("Terraria.ModLoader.UI.Loader.png"));
-			this.scale = scale;
+			_backgroundTexture = Texture2D.FromStream(Main.instance.GraphicsDevice,
+													  Assembly.GetExecutingAssembly()
+															  .GetManifestResourceStream("Terraria.ModLoader.UI.LoaderBG.png"));
+			_loaderTexture = Texture2D.FromStream(Main.instance.GraphicsDevice,
+												  Assembly.GetExecutingAssembly()
+														  .GetManifestResourceStream("Terraria.ModLoader.UI.Loader.png"));
+			_scale = scale;
 			Width.Pixels = 200f * scale;
 			Height.Pixels = 200f * scale;
 			HAlign = left;
@@ -28,34 +33,34 @@ namespace Terraria.ModLoader.UI
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			if (++frameTick >= maxDelay) {
+			if (++frameTick >= MAX_DELAY) {
 				frameTick = 0;
-				if (++frame >= maxFrames)
+				if (++frame >= MAX_FRAMES)
 					frame = 0;
 			}
 
-			CalculatedStyle dimensions = base.GetDimensions();
+			CalculatedStyle dimensions = GetDimensions();
 			// Draw BG
 			if (withBackground) {
-				spriteBatch.Draw(backgroundTexture,
+				spriteBatch.Draw(_backgroundTexture,
 								 new Vector2((int)dimensions.X, (int)dimensions.Y),
 								 new Rectangle(0, 0, 200, 200),
 								 Color.White,
 								 0f,
 								 new Vector2(0, 0),
-								 scale,
+								 _scale,
 								 SpriteEffects.None,
 								 0.0f);
 			}
 
 			// Draw loader animation
-			spriteBatch.Draw(loaderTexture,
+			spriteBatch.Draw(_loaderTexture,
 							 new Vector2((int)dimensions.X, (int)dimensions.Y),
 							 new Rectangle(200 * (frame / 8), 200 * (frame % 8), 200, 200),
 							 Color.White,
 							 0f,
 							 new Vector2(0, 0),
-							 scale,
+							 _scale,
 							 SpriteEffects.None,
 							 0.0f);
 		}

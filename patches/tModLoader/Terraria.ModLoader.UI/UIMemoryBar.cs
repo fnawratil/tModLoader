@@ -2,10 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Terraria.Graphics;
@@ -13,13 +11,13 @@ using Terraria.UI;
 
 namespace Terraria.ModLoader.UI
 {
-	class UIMemoryBar : UIElement
+	internal class UIMemoryBar : UIElement
 	{
 		private class MemoryBarItem
 		{
-			internal string tooltip;
-			internal long memory;
-			internal Color drawColor;
+			internal readonly string tooltip;
+			internal readonly long memory;
+			internal readonly Color drawColor;
 
 			public MemoryBarItem(string tooltip, long memory, Color drawColor) {
 				this.tooltip = tooltip;
@@ -28,16 +26,17 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
-		private readonly Texture2D innerPanelTexture;
 		internal static bool recalculateMemoryNeeded = true;
-		private List<MemoryBarItem> memoryBarItems;
-		private long maxMemory; //maximum memory Terraria could allocate before crashing if it was the only process on the system
+
+		private readonly Texture2D _innerPanelTexture;
+		private readonly List<MemoryBarItem> _memoryBarItems;
+		private long _maxMemory; //maximum memory Terraria could allocate before crashing if it was the only process on the system
 
 		public UIMemoryBar() {
 			Width.Set(0f, 1f);
 			Height.Set(20f, 0f);
-			innerPanelTexture = TextureManager.Load("Images/UI/InnerPanelBackground");
-			memoryBarItems = new List<MemoryBarItem>();
+			_innerPanelTexture = TextureManager.Load("Images/UI/InnerPanelBackground");
+			_memoryBarItems = new List<MemoryBarItem>();
 		}
 
 		public override void OnActivate() {
@@ -49,44 +48,48 @@ namespace Terraria.ModLoader.UI
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			if (recalculateMemoryNeeded) return;
 
-			var rectangle = GetInnerDimensions().ToRectangle();
+			var rectangle = GetInnerDimensions()
+				.ToRectangle();
 
 			var mouse = new Point(Main.mouseX, Main.mouseY);
 			int xOffset = 0;
-			int width = 0;
-			for (int i = 0; i < memoryBarItems.Count; i++) {
-				var memoryBarData = memoryBarItems[i];
-				width = (int)(rectangle.Width * (memoryBarData.memory / (float)maxMemory));
-				if (i == memoryBarItems.Count - 1) { // Fix rounding errors on last entry for consistent right edge
+
+			for (int i = 0; i < _memoryBarItems.Count; i++) {
+				var memoryBarData = _memoryBarItems[i];
+				int width = (int)(rectangle.Width * (memoryBarData.memory / (float)_maxMemory));
+				if (i == _memoryBarItems.Count - 1) { // Fix rounding errors on last entry for consistent right edge
 					width = rectangle.Right - xOffset - rectangle.X;
 				}
 
 				var drawArea = new Rectangle(rectangle.X + xOffset, rectangle.Y, width, rectangle.Height);
 				xOffset += width;
 				Main.spriteBatch.Draw(Main.magicPixel, drawArea, memoryBarData.drawColor);
-				if (drawArea.Contains(mouse)) {
-					Vector2 stringSize = Main.fontMouseText.MeasureString(memoryBarData.tooltip);
-					float x = stringSize.X;
-					Vector2 vector = Main.MouseScreen + new Vector2(16f);
-					if (vector.Y > Main.screenHeight - 30) {
-						vector.Y = Main.screenHeight - 30;
-					}
 
-					if (vector.X > Parent.GetDimensions().Width + Parent.GetDimensions().X - x - 40) {
-						vector.X = Parent.GetDimensions().Width + Parent.GetDimensions().X - x - 40;
-					}
+				if (!drawArea.Contains(mouse)) continue;
 
-					var r = new Rectangle((int)vector.X, (int)vector.Y, (int)x, (int)stringSize.Y);
-					r.Inflate(5, 5);
-					Main.spriteBatch.Draw(Main.magicPixel, r, UICommon.UI_BLUE_COLOR);
-					Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, memoryBarData.tooltip, vector.X, vector.Y, new Color((int)Main.mouseTextColor, (int)Main.mouseTextColor, (int)Main.mouseTextColor, (int)Main.mouseTextColor), Color.Black, Vector2.Zero, 1f);
+				Vector2 stringSize = Main.fontMouseText.MeasureString(memoryBarData.tooltip);
+				float x = stringSize.X;
+				Vector2 vector = Main.MouseScreen + new Vector2(16f);
+				if (vector.Y > Main.screenHeight - 30) {
+					vector.Y = Main.screenHeight - 30;
 				}
-			}
 
-			return;
+				if (vector.X > Parent.GetDimensions()
+									 .Width + Parent.GetDimensions().X - x - 40) {
+					vector.X = Parent.GetDimensions()
+									 .Width + Parent.GetDimensions().X - x - 40;
+				}
+
+				var r = new Rectangle((int)vector.X, (int)vector.Y, (int)x, (int)stringSize.Y);
+				r.Inflate(5, 5);
+				Main.spriteBatch.Draw(Main.magicPixel, r, UICommon.UI_BLUE_COLOR);
+				Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, memoryBarData.tooltip, vector.X,
+											  vector.Y, new Color(Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor), Color.Black, Vector2.Zero,
+											  1f);
+			}
 		}
 
-		private Color[] colors = {
+		private readonly Color[] _colors = {
 			new Color(232, 76, 61), //red
 			new Color(155, 88, 181), //purple
 			new Color(27, 188, 155), //aqua
@@ -96,11 +99,11 @@ namespace Terraria.ModLoader.UI
 		};
 
 		private void RecalculateMemory() {
-			memoryBarItems.Clear();
+			_memoryBarItems.Clear();
 
 #if WINDOWS
-			maxMemory = Environment.Is64BitOperatingSystem ? 4294967296 : 3221225472;
-			long availableMemory = maxMemory; // CalculateAvailableMemory(maxMemory); This is wrong, 4GB is not shared.
+			_maxMemory = Environment.Is64BitOperatingSystem ? 4294967296 : 3221225472;
+			long availableMemory = _maxMemory; // CalculateAvailableMemory(maxMemory); This is wrong, 4GB is not shared.
 #else
 			long maxMemory = GetTotalMemory();
 			long availableMemory = GetAvailableMemory();
@@ -116,7 +119,8 @@ namespace Terraria.ModLoader.UI
 
 				totalModMemory += usage.total;
 				var sb = new StringBuilder();
-				sb.Append(ModLoader.GetMod(modName).DisplayName);
+				sb.Append(ModLoader.GetMod(modName)
+								   .DisplayName);
 				sb.Append($"\nEstimate last load RAM usage: {SizeSuffix(usage.total)}");
 				if (usage.managed > 0)
 					sb.Append($"\n Managed: {SizeSuffix(usage.managed)}");
@@ -126,17 +130,18 @@ namespace Terraria.ModLoader.UI
 					sb.Append($"\n Sounds: {SizeSuffix(usage.sounds)}");
 				if (usage.textures > 0)
 					sb.Append($"\n Textures: {SizeSuffix(usage.textures)}");
-				memoryBarItems.Add(new MemoryBarItem(sb.ToString(), usage.total, colors[i++ % colors.Length]));
+				_memoryBarItems.Add(new MemoryBarItem(sb.ToString(), usage.total, _colors[i++ % _colors.Length]));
 			}
 
-			long allocatedMemory = Process.GetCurrentProcess().WorkingSet64;
+			long allocatedMemory = Process.GetCurrentProcess()
+										  .WorkingSet64;
 			var nonModMemory = allocatedMemory - totalModMemory;
-			memoryBarItems.Add(new MemoryBarItem($"Terraria + misc: {SizeSuffix(nonModMemory)}\n Total: {SizeSuffix(allocatedMemory)}",
-												 nonModMemory, Color.DeepSkyBlue));
+			_memoryBarItems.Add(new MemoryBarItem($"Terraria + misc: {SizeSuffix(nonModMemory)}\n Total: {SizeSuffix(allocatedMemory)}",
+												  nonModMemory, Color.DeepSkyBlue));
 
 			var remainingMemory = availableMemory - allocatedMemory;
-			memoryBarItems.Add(new MemoryBarItem($"Available Memory: {SizeSuffix(remainingMemory)}\n Total: {SizeSuffix(availableMemory)}",
-												 remainingMemory, Color.Gray));
+			_memoryBarItems.Add(new MemoryBarItem($"Available Memory: {SizeSuffix(remainingMemory)}\n Total: {SizeSuffix(availableMemory)}",
+												  remainingMemory, Color.Gray));
 
 			//portion = (maxMemory - availableMemory - meminuse) / (float)maxMemory;
 			//memoryBarItems.Add(new MemoryBarData($"Other programs: {SizeSuffix(maxMemory - availableMemory - meminuse)}", portion, Color.Black));
@@ -186,9 +191,9 @@ namespace Terraria.ModLoader.UI
 		}
 		*/
 
-		static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+		private static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 
-		static string SizeSuffix(long value, int decimalPlaces = 1) {
+		private static string SizeSuffix(long value, int decimalPlaces = 1) {
 			if (value < 0) {
 				return "-" + SizeSuffix(-value);
 			}
@@ -211,7 +216,7 @@ namespace Terraria.ModLoader.UI
 				adjustedSize /= 1024;
 			}
 
-			return string.Format("{0:n" + decimalPlaces + "} {1}",
+			return string.Format("{{0:n" + decimalPlaces + "}} {1}",
 								 adjustedSize,
 								 SizeSuffixes[mag]);
 		}

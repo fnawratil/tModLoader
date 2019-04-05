@@ -16,13 +16,12 @@ namespace Terraria.ModLoader.UI
 		public float TextScale { get; set; } = 1f;
 		public Vector2 TextSize { get; private set; } = Vector2.Zero;
 		public Color TextColor { get; set; } = Color.White;
+		public string Text => _text?.ToString() ?? "";
 
 		private T _text;
 		private string[] _textStrings;
 		private Vector2[] _drawOffsets;
 		private Rectangle _oldInnerDimensions;
-
-		public string Text => _text?.ToString() ?? "";
 
 		public UIScalingTextPanel(T text, float textScaleMax = 1f, bool large = false) {
 			SetText(text, textScaleMax, large);
@@ -95,7 +94,8 @@ namespace Terraria.ModLoader.UI
 			for (int i = 0; i < _textStrings.Length; i++) {
 				//Vector2 pos = innerDimensions.Center.ToVector2() + drawOffsets[i];
 				Vector2 pos = innerDimensions.TopLeft() + _drawOffsets[i];
-				Utils.DrawBorderString(spriteBatch, _textStrings[i], pos, TextColor, TextScale, 0f, 0f, -1);
+				Utils.DrawBorderString(spriteBatch, _textStrings[i], pos, TextColor,
+									   TextScale, 0f, 0f, -1);
 			}
 
 			//foreach (var singleLine in textStrings)

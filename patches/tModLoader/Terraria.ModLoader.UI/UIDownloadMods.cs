@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Security;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
@@ -58,7 +57,7 @@ namespace Terraria.ModLoader.UI
 				_client.DownloadProgressChanged += Client_DownloadProgressChanged;
 				_client.DownloadFileCompleted += Client_DownloadFileCompleted;
 				_currentDownload = _modsToDownload.Dequeue();
-				_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", $"{_name}: {_currentDownload.displayname}"));
+				_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", $"{_name}: {_currentDownload.displayName}"));
 				_client.DownloadFileAsync(new Uri(_currentDownload.download), ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod");
 			}
 			else {
@@ -115,7 +114,7 @@ namespace Terraria.ModLoader.UI
 				// Start next download
 				if (_modsToDownload.Count != 0) {
 					_currentDownload = _modsToDownload.Dequeue();
-					_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", $"{_name}: {_currentDownload.displayname}"));
+					_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", $"{_name}: {_currentDownload.displayName}"));
 					_loadProgress.SetProgress(0f);
 					_client.DownloadFileAsync(new Uri(_currentDownload.download), ModLoader.ModPath + Path.DirectorySeparatorChar + "temporaryDownload.tmod");
 				}

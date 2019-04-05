@@ -8,12 +8,12 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIUploadMod : UIState
 	{
-		private UILoadProgress loadProgress;
-		private string name;
-		private Action cancelAction;
+		private UILoadProgress _loadProgress;
+		private string _name;
+		private Action _cancelAction;
 
 		public override void OnInitialize() {
-			loadProgress = new UILoadProgress {
+			_loadProgress = new UILoadProgress {
 				Width = { Percent = 0.8f },
 				MaxWidth = UICommon.MAX_PANEL_WIDTH,
 				Height = { Pixels = 150 },
@@ -21,7 +21,7 @@ namespace Terraria.ModLoader.UI
 				VAlign = 0.5f,
 				Top = { Pixels = 10 }
 			};
-			Append(loadProgress);
+			Append(_loadProgress);
 
 			var cancel = new UITextPanel<string>(Language.GetTextValue("UI.Cancel"), 0.75f, true) {
 				VAlign = 0.5f,
@@ -33,27 +33,27 @@ namespace Terraria.ModLoader.UI
 		}
 
 		public override void OnActivate() {
-			loadProgress.SetText("Uploading: " + name);
-			loadProgress.SetProgress(0f);
+			_loadProgress.SetText("Uploading: " + _name);
+			_loadProgress.SetProgress(0f);
 		}
 
 		internal void SetDownloading(string name) {
-			this.name = name;
+			_name = name;
 		}
 
 		public void SetCancel(Action cancelAction) {
-			this.cancelAction = cancelAction;
+			_cancelAction = cancelAction;
 		}
 
 		internal void SetProgress(UploadProgressChangedEventArgs e) => SetProgress(e.BytesSent, e.TotalBytesToSend);
 
 		internal void SetProgress(long count, long len) {
-			loadProgress?.SetProgress((float)count / len);
+			_loadProgress?.SetProgress((float)count / len);
 		}
 
 		private void CancelClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(ID.SoundID.MenuOpen);
-			cancelAction();
+			_cancelAction();
 		}
 	}
 }

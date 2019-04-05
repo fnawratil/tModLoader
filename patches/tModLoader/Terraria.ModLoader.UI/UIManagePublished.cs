@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json.Linq;
 using System;
@@ -14,8 +13,9 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIManagePublished : UIState
 	{
-		private UIList myPublishedMods;
 		public UITextPanel<string> textPanel;
+
+		private UIList _myPublishedMods;
 
 		public override void OnInitialize() {
 			var area = new UIElement {
@@ -33,19 +33,19 @@ namespace Terraria.ModLoader.UI
 			};
 			area.Append(uIPanel);
 
-			myPublishedMods = new UIList {
+			_myPublishedMods = new UIList {
 				Width = { Pixels = -25, Percent = 1f },
 				Height = { Percent = 1f },
 				ListPadding = 5f
 			};
-			uIPanel.Append(myPublishedMods);
+			uIPanel.Append(_myPublishedMods);
 
 			var uIScrollbar = new UIScrollbar {
 				Height = { Percent = 1f },
 				HAlign = 1f
 			}.WithView(100f, 1000f);
 			uIPanel.Append(uIScrollbar);
-			myPublishedMods.SetScrollbar(uIScrollbar);
+			_myPublishedMods.SetScrollbar(uIScrollbar);
 
 			textPanel = new UITextPanel<string>(Language.GetTextValue("tModLoader.MBMyPublishedMods"), 0.8f, true) {
 				HAlign = 0.5f,
@@ -78,12 +78,12 @@ namespace Terraria.ModLoader.UI
 		}
 
 		public override void OnActivate() {
-			myPublishedMods.Clear();
+			_myPublishedMods.Clear();
 			textPanel.SetText(Language.GetTextValue("tModLoader.MBMyPublishedMods"), 0.8f, true);
 			string response = "";
 			try {
 				ServicePointManager.Expect100Continue = false;
-				string url = "http://javid.ddns.net/tModLoader/listmymods.php";
+				const string url = "http://javid.ddns.net/tModLoader/listmymods.php";
 				var values = new NameValueCollection {
 					{ "steamid64", ModLoader.SteamID64 },
 					{ "modloaderversion", ModLoader.versionedName },
@@ -117,7 +117,7 @@ namespace Terraria.ModLoader.UI
 													  (string)o["downloads"],
 													  (string)o["downloadsversion"],
 													  (string)o["modloaderversion"]);
-					myPublishedMods.Add(modItem);
+					_myPublishedMods.Add(modItem);
 				}
 			}
 			catch (Exception e) {

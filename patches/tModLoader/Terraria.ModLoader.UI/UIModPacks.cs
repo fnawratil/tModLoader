@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
@@ -15,11 +14,12 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIModPacks : UIState
 	{
-		private UIList modListList;
-		private UILoaderAnimatedImage uiLoader;
-		private UIPanel scrollPanel;
 		internal static string ModListSaveDirectory = ModLoader.ModPath + Path.DirectorySeparatorChar + "ModPacks";
 		internal static string[] mods;
+
+		private UIList _modListList;
+		private UILoaderAnimatedImage _uiLoader;
+		private UIPanel _scrollPanel;
 
 		public override void OnInitialize() {
 			var uIElement = new UIElement {
@@ -30,28 +30,28 @@ namespace Terraria.ModLoader.UI
 				HAlign = 0.5f
 			};
 
-			uiLoader = new UILoaderAnimatedImage(0.5f, 0.5f, 1f);
+			_uiLoader = new UILoaderAnimatedImage(0.5f, 0.5f, 1f);
 
-			scrollPanel = new UIPanel {
+			_scrollPanel = new UIPanel {
 				Width = { Percent = 1f },
 				Height = { Pixels = -65, Percent = 1f },
 				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR
 			};
-			uIElement.Append(scrollPanel);
+			uIElement.Append(_scrollPanel);
 
-			modListList = new UIList {
+			_modListList = new UIList {
 				Width = { Pixels = -25, Percent = 1f },
 				Height = { Percent = 1f },
 				ListPadding = 5f
 			};
-			scrollPanel.Append(modListList);
+			_scrollPanel.Append(_modListList);
 
 			var uIScrollbar = new UIScrollbar {
 				Height = { Percent = 1f },
 				HAlign = 1f
 			}.WithView(100f, 1000f);
-			scrollPanel.Append(uIScrollbar);
-			modListList.SetScrollbar(uIScrollbar);
+			_scrollPanel.Append(uIScrollbar);
+			_modListList.SetScrollbar(uIScrollbar);
 
 			var titleTextPanel = new UITextPanel<string>(Language.GetTextValue("tModLoader.ModPacksHeader"), 0.8f, true) {
 				HAlign = 0.5f,
@@ -82,7 +82,8 @@ namespace Terraria.ModLoader.UI
 
 		private static void SaveNewModList(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(11, -1, -1, 1);
-			Main.MenuUI.SetState(new UIVirtualKeyboard(Language.GetTextValue("tModLoader.ModPacksEnterModPackName"), "", new UIVirtualKeyboard.KeyboardSubmitEvent(SaveModList), () => Main.menuMode = Interface.modPacksMenuID, 0));
+			Main.MenuUI.SetState(new UIVirtualKeyboard(Language.GetTextValue("tModLoader.ModPacksEnterModPackName"), "", new UIVirtualKeyboard.KeyboardSubmitEvent(SaveModList), () => Main.menuMode = Interface.modPacksMenuID,
+													   0));
 			Main.menuMode = 888;
 		}
 
@@ -113,8 +114,8 @@ namespace Terraria.ModLoader.UI
 		}
 
 		public override void OnActivate() {
-			scrollPanel.Append(uiLoader);
-			modListList.Clear();
+			_scrollPanel.Append(_uiLoader);
+			_modListList.Clear();
 			Task.Factory
 				.StartNew(delegate {
 					mods = ModOrganizer.FindMods().Select(m => m.Name).ToArray();
@@ -136,18 +137,18 @@ namespace Terraria.ModLoader.UI
 							}
 
 							UIModPackItem modItem = new UIModPackItem(Path.GetFileNameWithoutExtension(modListFilePath), mods);
-							modListList.Add(modItem);
+							_modListList.Add(modItem);
 						}
 						catch {
 							var badModPackMessage = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPackMalformed", Path.GetFileName(modListFilePath))) {
 								Width = { Percent = 1 },
 								Height = { Pixels = 50, Percent = 0 }
 							};
-							modListList.Add(badModPackMessage);
+							_modListList.Add(badModPackMessage);
 						}
 					}
 
-					scrollPanel.RemoveChild(uiLoader);
+					_scrollPanel.RemoveChild(_uiLoader);
 				}, TaskScheduler.FromCurrentSynchronizationContext());
 		}
 

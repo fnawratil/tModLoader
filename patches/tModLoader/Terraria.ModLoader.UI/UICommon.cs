@@ -25,9 +25,9 @@ namespace Terraria.ModLoader.UI
 				outColor = UI_BLUE_MOUSEOVER_COLOR;
 
 			elem.OnMouseOver += (evt, _) => {
-				                    Main.PlaySound(SoundID.MenuTick);
-				                    elem.BackgroundColor = overColor;
-			                    };
+				Main.PlaySound(SoundID.MenuTick);
+				elem.BackgroundColor = overColor;
+			};
 			elem.OnMouseOut += (evt, _) => { elem.BackgroundColor = outColor; };
 			return elem;
 		}
@@ -64,7 +64,9 @@ namespace Terraria.ModLoader.UI
 			vector.X = Math.Min(vector.X, bounds.Value.Right - x - 16);
 			vector.Y = Math.Min(vector.Y, bounds.Value.Bottom - 30);
 			Color drawColor = new Color(Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor, Main.mouseTextColor);
-			Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, text, vector.X, vector.Y, drawColor, Color.Black, Vector2.Zero, 1f);
+			Utils.DrawBorderStringFourWay(spriteBatch, Main.fontMouseText, text, vector.X,
+										  vector.Y, drawColor, Color.Black, Vector2.Zero,
+										  1f);
 		}
 	}
 }

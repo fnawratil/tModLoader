@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
 
 namespace Terraria.ModLoader.UI
@@ -16,7 +14,8 @@ namespace Terraria.ModLoader.UI
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			base.DrawSelf(spriteBatch);
 			if (IsMouseHovering) {
-				var bounds = Parent.GetDimensions().ToRectangle();
+				var bounds = Parent.GetDimensions()
+								   .ToRectangle();
 				bounds.Y = 0;
 				bounds.Height = Main.screenHeight;
 				UICommon.DrawHoverStringInBounds(spriteBatch, hoverText, bounds);

@@ -7,9 +7,9 @@ namespace Terraria.ModLoader.UI
 	//TODO how is this different to UIInfoMessage?
 	internal class UIUpdateMessage : UIState
 	{
-		private UIMessageBox message = new UIMessageBox("");
-		private int gotoMenu = 0;
-		private string url;
+		private int _gotoMenu;
+		private string _url;
+		private readonly UIMessageBox _message = new UIMessageBox("");
 
 		public override void OnInitialize() {
 			var area = new UIElement {
@@ -19,10 +19,10 @@ namespace Terraria.ModLoader.UI
 				HAlign = 0.5f
 			};
 
-			message.Width.Percent = 1f;
-			message.Height.Percent = 0.8f;
-			message.HAlign = 0.5f;
-			area.Append(message);
+			_message.Width.Percent = 1f;
+			_message.Height.Percent = 0.8f;
+			_message.HAlign = 0.5f;
+			area.Append(_message);
 
 			var button = new UITextPanel<string>("Ignore", 0.7f, true) {
 				Width = { Pixels = -10, Percent = 0.5f },
@@ -38,31 +38,31 @@ namespace Terraria.ModLoader.UI
 			button2.CopyStyle(button);
 			button2.HAlign = 1f;
 			button2.WithFadedMouseOver();
-			button2.OnClick += OpenURL;
+			button2.OnClick += OpenUrl;
 			area.Append(button2);
 			Append(area);
 		}
 
 		internal void SetMessage(string text) {
-			message.SetText(text);
+			_message.SetText(text);
 		}
 
 		internal void SetGotoMenu(int gotoMenu) {
-			this.gotoMenu = gotoMenu;
+			_gotoMenu = gotoMenu;
 		}
 
-		internal void SetURL(string url) {
-			this.url = url;
+		internal void SetUrl(string url) {
+			_url = url;
 		}
 
 		private void IgnoreClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10, -1, -1, 1);
-			Main.menuMode = gotoMenu;
+			Main.menuMode = _gotoMenu;
 		}
 
-		private void OpenURL(UIMouseEvent evt, UIElement listeningElement) {
+		private void OpenUrl(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10, -1, -1, 1);
-			Process.Start(url);
+			Process.Start(_url);
 		}
 	}
 }

@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
 using System.IO;
@@ -12,17 +11,19 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIModInfo : UIState
 	{
-		internal UIElement uIElement;
 		public UIMessageBox modInfo;
 		public UITextPanel<string> uITextPanel;
+
+		internal UIElement uIElement;
 		internal UIScalingTextPanel<string> modHomepageButton;
 		internal UIScalingTextPanel<string> extractButton;
 		internal UIScalingTextPanel<string> deleteButton;
-		private int gotoMenu = 0;
-		private LocalMod localMod;
-		private string url = "";
-		private string info = "";
-		private string modDisplayName = "";
+
+		private int _gotoMenu = 0;
+		private LocalMod _localMod;
+		private string _url = "";
+		private string _info = "";
+		private string _modDisplayName = "";
 
 		public override void OnInitialize() {
 			uIElement = new UIElement {
@@ -104,70 +105,70 @@ namespace Terraria.ModLoader.UI
 
 		// TODO use Show pattern
 		internal void SetModInfo(string text) {
-			info = text;
-			if (info.Equals("")) {
-				info = Language.GetTextValue("tModLoader.ModInfoNoDescriptionAvailable");
+			_info = text;
+			if (_info.Equals("")) {
+				_info = Language.GetTextValue("tModLoader.ModInfoNoDescriptionAvailable");
 			}
 		}
 
 		internal void SetModName(string text) {
-			modDisplayName = text;
+			_modDisplayName = text;
 		}
 
 		internal void SetGotoMenu(int gotoMenu) {
-			this.gotoMenu = gotoMenu;
+			_gotoMenu = gotoMenu;
 		}
 
-		internal void SetURL(string url) {
-			this.url = url;
+		internal void SetUrl(string url) {
+			_url = url;
 		}
 
 		internal void SetMod(LocalMod mod) {
-			localMod = mod;
+			_localMod = mod;
 		}
 
 		private void BackClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(11);
-			Main.menuMode = gotoMenu;
+			Main.menuMode = _gotoMenu;
 		}
 
 		private void ExtractClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(ID.SoundID.MenuOpen);
-			Interface.extractMod.Show(localMod, gotoMenu);
+			Interface.extractMod.Show(_localMod, _gotoMenu);
 		}
 
 		private void DeleteClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(ID.SoundID.MenuClose);
-			File.Delete(localMod.modFile.path);
-			Main.menuMode = gotoMenu;
+			File.Delete(_localMod.modFile.path);
+			Main.menuMode = _gotoMenu;
 		}
 
 		private void VisitModHomePage(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10);
-			Process.Start(url);
+			Process.Start(_url);
 		}
 
 		public override void Draw(SpriteBatch spriteBatch) {
 			base.Draw(spriteBatch);
 			UILinkPointNavigator.Shortcuts.BackButtonCommand = 100;
-			UILinkPointNavigator.Shortcuts.BackButtonGoto = this.gotoMenu;
+			UILinkPointNavigator.Shortcuts.BackButtonGoto = _gotoMenu;
 			if (modHomepageButton.IsMouseHovering) {
-				UICommon.DrawHoverStringInBounds(spriteBatch, url);
+				UICommon.DrawHoverStringInBounds(spriteBatch, _url);
 			}
 		}
 
 		public override void OnActivate() {
-			uITextPanel.SetText(Language.GetTextValue("tModLoader.ModInfoHeader") + modDisplayName, 0.8f, true);
-			modInfo.SetText(info);
-			if (url.Equals("")) {
+			uITextPanel.SetText(Language.GetTextValue("tModLoader.ModInfoHeader") + _modDisplayName, 0.8f, true);
+			modInfo.SetText(_info);
+			if (_url.Equals("")) {
 				modHomepageButton.Remove();
 			}
 			else {
 				uIElement.Append(modHomepageButton);
 			}
 
-			if (localMod != null) {
-				uIElement.AddOrRemoveChild(deleteButton, !ModLoader.Mods.Any(x => x.Name == localMod.Name));
+			if (_localMod != null) {
+				uIElement.AddOrRemoveChild(deleteButton, ModLoader.Mods.All(x => x.Name != _localMod.Name));
 				uIElement.Append(extractButton);
 			}
 			else {

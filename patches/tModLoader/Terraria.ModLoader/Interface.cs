@@ -98,12 +98,12 @@ namespace Terraria.ModLoader
 			modBrowser.updateFilterMode = UpdateFilter.Available;
 			modBrowser.searchFilterMode = SearchFilter.Name;
 			modBrowser.modSideFilterMode = ModSideFilter.All;
-			if (modBrowser._categoryButtons.Count == 4) // basically checking if modBrowser._isInitialized
+			if (modBrowser.categoryButtons.Count == 4) // basically checking if modBrowser._isInitialized
 			{
-				modBrowser._categoryButtons[0].SetCurrentState((int)modBrowser.sortMode);
-				modBrowser._categoryButtons[1].SetCurrentState((int)modBrowser.updateFilterMode);
-				modBrowser._categoryButtons[2].SetCurrentState((int)modBrowser.modSideFilterMode);
-				modBrowser._categoryButtons[3].SetCurrentState((int)modBrowser.searchFilterMode);
+				modBrowser.categoryButtons[0].SetCurrentState((int)modBrowser.sortMode);
+				modBrowser.categoryButtons[1].SetCurrentState((int)modBrowser.updateFilterMode);
+				modBrowser.categoryButtons[2].SetCurrentState((int)modBrowser.modSideFilterMode);
+				modBrowser.categoryButtons[3].SetCurrentState((int)modBrowser.searchFilterMode);
 			}
 			modBrowser.loading = false;
 			ModOrganizer.modsDirCache.Clear();

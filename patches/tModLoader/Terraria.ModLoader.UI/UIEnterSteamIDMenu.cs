@@ -9,7 +9,8 @@ namespace Terraria.ModLoader.UI
 	//TODO is this meaningfully different to EnterPassphraseMenu?
 	internal class UIEnterSteamIDMenu : UIState
 	{
-		string registerURL = "http://javid.ddns.net/tModLoader/register.php";
+		private const string REGISTER_URL = "http://javid.ddns.net/tModLoader/register.php";
+
 		public UITextPanel<string> uITextPanel;
 		internal UIInputTextField steamIDTextField;
 		private int gotoMenu;
@@ -45,14 +46,14 @@ namespace Terraria.ModLoader.UI
 				Top = { Pixels = -65 }
 			};
 			button.WithFadedMouseOver();
-			button.OnClick += BackClick;
+			button.OnClick += OnClickBack;
 			uIElement.Append(button);
 
 			button = new UITextPanel<string>(Language.GetTextValue("UI.Submit"));
 			button.CopyStyle(button);
 			button.HAlign = 1f;
 			button.WithFadedMouseOver();
-			button.OnClick += OKClick;
+			button.OnClick += OnClickOk;
 			uIElement.Append(button);
 
 			//UITextPanel<string> button3 = new UITextPanel<string>("Visit Website to Generate Passphrase");
@@ -75,14 +76,14 @@ namespace Terraria.ModLoader.UI
 			Append(uIElement);
 		}
 
-		private void OKClick(UIMouseEvent evt, UIElement listeningElement) {
+		private void OnClickOk(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10, -1, -1, 1);
 			ModLoader.SteamID64 = steamIDTextField.Text.Trim();
 			Main.SaveSettings();
 			Main.menuMode = this.gotoMenu;
 		}
 
-		private void BackClick(UIMouseEvent evt, UIElement listeningElement) {
+		private void OnClickBack(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(11, -1, -1, 1);
 			Main.menuMode = this.gotoMenu;
 		}
@@ -90,7 +91,7 @@ namespace Terraria.ModLoader.UI
 		//TODO unused
 		private void VisitRegisterWebpage(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10, -1, -1, 1);
-			Process.Start(registerURL);
+			Process.Start(REGISTER_URL);
 		}
 
 		//TODO unused

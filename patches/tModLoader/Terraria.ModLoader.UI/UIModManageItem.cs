@@ -18,9 +18,10 @@ namespace Terraria.ModLoader.UI
 		public string displayname;
 		public string version;
 		public string author;
-		private Texture2D dividerTexture;
-		private UIText modName;
-		UITextPanel<string> button2;
+
+		private readonly Texture2D _dividerTexture;
+		private readonly UIText _modName;
+		private readonly UITextPanel<string> _unpublishButton;
 
 		public UIModManageItem(string displayname, string name, string version, string author, string downloads, string downloadsversion, string modloaderversion) {
 			this.displayname = displayname;
@@ -29,17 +30,17 @@ namespace Terraria.ModLoader.UI
 			this.name = name;
 
 			BorderColor = new Color(89, 116, 213) * 0.7f;
-			dividerTexture = TextureManager.Load("Images/UI/Divider");
+			_dividerTexture = TextureManager.Load("Images/UI/Divider");
 			Height.Pixels = 90;
 			Width.Percent = 1f;
 			SetPadding(6f);
 
-			string text = displayname + " " + version + " - by " + author + " - " + modloaderversion;
-			modName = new UIText(text) {
+			string text = $"{displayname} {version} - by {author} - {modloaderversion}";
+			_modName = new UIText(text) {
 				Left = { Pixels = 10 },
 				Top = { Pixels = 5 }
 			};
-			Append(modName);
+			Append(_modName);
 			var button = new UITextPanel<string>(Language.GetTextValue("tModLoader.MBMyPublishedModsStats", downloads, downloadsversion)) {
 				Width = { Pixels = 260 },
 				Height = { Pixels = 30 },
@@ -51,32 +52,34 @@ namespace Terraria.ModLoader.UI
 			//	button.OnMouseOver += UICommon.FadedMouseOver;
 			//	button.OnMouseOut += UICommon.FadedMouseOut;
 			Append(button);
-			button2 = new UITextPanel<string>(Language.GetTextValue("tModLoader.MBUnpublish"));
-			button2.CopyStyle(button);
-			button2.Width.Pixels = 150;
-			button2.Left.Pixels = 360;
-			button2.WithFadedMouseOver();
-			button2.OnClick += Unpublish;
-			Append(button2);
+			_unpublishButton = new UITextPanel<string>(Language.GetTextValue("tModLoader.MBUnpublish"));
+			_unpublishButton.CopyStyle(button);
+			_unpublishButton.Width.Pixels = 150;
+			_unpublishButton.Left.Pixels = 360;
+			_unpublishButton.WithFadedMouseOver();
+			_unpublishButton.OnClick += Unpublish;
+			Append(_unpublishButton);
 		}
 
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
 			base.DrawSelf(spriteBatch);
-			CalculatedStyle innerDimensions = base.GetInnerDimensions();
+			CalculatedStyle innerDimensions = GetInnerDimensions();
 			var drawPos = new Vector2(innerDimensions.X + 5f, innerDimensions.Y + 30f);
-			spriteBatch.Draw(dividerTexture, drawPos, null, Color.White, 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f) / 8f, 1f), SpriteEffects.None, 0f);
+			spriteBatch.Draw(_dividerTexture, drawPos, null, Color.White,
+							 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f) / 8f, 1f), SpriteEffects.None,
+							 0f);
 		}
 
 		public override void MouseOver(UIMouseEvent evt) {
 			base.MouseOver(evt);
-			this.BackgroundColor = UICommon.UI_BLUE_COLOR;
-			this.BorderColor = new Color(89, 116, 213);
+			BackgroundColor = UICommon.UI_BLUE_COLOR;
+			BorderColor = new Color(89, 116, 213);
 		}
 
 		public override void MouseOut(UIMouseEvent evt) {
 			base.MouseOut(evt);
-			this.BackgroundColor = new Color(63, 82, 151) * 0.7f;
-			this.BorderColor = new Color(89, 116, 213) * 0.7f;
+			BackgroundColor = new Color(63, 82, 151) * 0.7f;
+			BorderColor = new Color(89, 116, 213) * 0.7f;
 		}
 
 		internal void Unpublish(UIMouseEvent evt, UIElement listeningElement) {
@@ -91,7 +94,7 @@ namespace Terraria.ModLoader.UI
 				ServicePointManager.Expect100Continue = false;
 				string url = "http://javid.ddns.net/tModLoader/unpublishmymod.php";
 				var values = new NameValueCollection {
-					{ "name", this.name },
+					{ "name", name },
 					{ "steamid64", ModLoader.SteamID64 },
 					{ "modloaderversion", ModLoader.versionedName },
 					{ "passphrase", ModLoader.modBrowserPassphrase },
