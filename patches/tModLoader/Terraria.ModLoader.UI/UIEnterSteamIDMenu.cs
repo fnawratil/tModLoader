@@ -76,30 +76,30 @@ namespace Terraria.ModLoader.UI
 			Append(uIElement);
 		}
 
-		private void OnClickOk(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(10, -1, -1, 1);
-			ModLoader.SteamID64 = steamIDTextField.Text.Trim();
-			Main.SaveSettings();
-			Main.menuMode = this.gotoMenu;
+		//TODO unused
+		internal void SetGotoMenu(int gotoMenu) {
+			this.gotoMenu = gotoMenu;
 		}
 
 		private void OnClickBack(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(11, -1, -1, 1);
-			Main.menuMode = this.gotoMenu;
+			Main.menuMode = gotoMenu;
 		}
 
-		//TODO unused
-		private void VisitRegisterWebpage(UIMouseEvent evt, UIElement listeningElement) {
+		private void OnClickOk(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10, -1, -1, 1);
-			Process.Start(REGISTER_URL);
+			ModLoader.SteamID64 = steamIDTextField.Text.Trim();
+			Main.SaveSettings();
+			Main.menuMode = gotoMenu;
 		}
 
 		//TODO unused
 		private void OnTextChange(object sender, EventArgs e) { }
 
 		//TODO unused
-		internal void SetGotoMenu(int gotoMenu) {
-			this.gotoMenu = gotoMenu;
+		private void VisitRegisterWebpage(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(10, -1, -1, 1);
+			Process.Start(REGISTER_URL);
 		}
 	}
 }

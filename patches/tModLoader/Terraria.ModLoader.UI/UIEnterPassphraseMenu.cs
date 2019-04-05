@@ -8,9 +8,9 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIEnterPassphraseMenu : UIState
 	{
-		readonly string registerURL = "http://javid.ddns.net/tModLoader/register.php";
 		public UITextPanel<string> uITextPanel;
 		internal UIInputTextField passcodeTextField;
+		private readonly string registerURL = "http://javid.ddns.net/tModLoader/register.php";
 		private int gotoMenu;
 
 		public override void OnInitialize() {
@@ -72,6 +72,15 @@ namespace Terraria.ModLoader.UI
 			Append(uIElement);
 		}
 
+		internal void SetGotoMenu(int gotoMenu) {
+			this.gotoMenu = gotoMenu;
+		}
+
+		private void BackClick(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(11, -1, -1, 1);
+			Main.menuMode = gotoMenu;
+		}
+
 		private void OKClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10, -1, -1, 1);
 			ModLoader.modBrowserPassphrase = passcodeTextField.Text.Trim();
@@ -80,24 +89,15 @@ namespace Terraria.ModLoader.UI
 			Main.menuMode = Interface.enterSteamIDMenuID;
 			Interface.enterSteamIDMenu.SetGotoMenu(this.gotoMenu);
 #else
-			Main.menuMode = this.gotoMenu;
+			Main.menuMode = gotoMenu;
 #endif
-		}
-
-		private void BackClick(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(11, -1, -1, 1);
-			Main.menuMode = this.gotoMenu;
-		}
-
-		private void VisitRegisterWebpage(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(10, -1, -1, 1);
-			Process.Start(registerURL);
 		}
 
 		private void OnTextChange(object sender, EventArgs e) { }
 
-		internal void SetGotoMenu(int gotoMenu) {
-			this.gotoMenu = gotoMenu;
+		private void VisitRegisterWebpage(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(10, -1, -1, 1);
+			Process.Start(registerURL);
 		}
 	}
 }

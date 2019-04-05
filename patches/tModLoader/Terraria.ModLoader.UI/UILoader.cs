@@ -1,22 +1,22 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Reflection;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Reflection;
 using Terraria.UI;
 
 namespace Terraria.ModLoader.UI
 {
 	internal sealed class UILoaderAnimatedImage : UIElement
 	{
-		public const int MAX_FRAMES = 16;
 		public const int MAX_DELAY = 5;
+		public const int MAX_FRAMES = 16;
+		public int frame;
+		public int frameTick;
 
 		public bool withBackground = false;
-		public int frameTick;
-		public int frame;
-
-		private readonly float _scale;
 		private readonly Texture2D _backgroundTexture;
 		private readonly Texture2D _loaderTexture;
+
+		private readonly float _scale;
 
 		public UILoaderAnimatedImage(float left, float top, float scale = 1f) {
 			_backgroundTexture = Texture2D.FromStream(Main.instance.GraphicsDevice,

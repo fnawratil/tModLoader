@@ -1,15 +1,22 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
+using Terraria.GameInput;
 using Terraria.UI;
 
 namespace Terraria.ModLoader.UI
 {
 	internal class UIInputTextField : UIElement
 	{
+		public delegate void EventHandler(object sender, EventArgs e);
+
 		private readonly string _hintText;
 		private string _currentString = "";
 		private int _textBlinkerCount;
+
+		public UIInputTextField(string hintText) {
+			_hintText = hintText;
+		}
 
 		public string Text {
 			get => _currentString;
@@ -20,16 +27,8 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
-		public delegate void EventHandler(object sender, EventArgs e);
-
-		public event EventHandler OnTextChange;
-
-		public UIInputTextField(string hintText) {
-			_hintText = hintText;
-		}
-
 		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			GameInput.PlayerInput.WritingText = true;
+			PlayerInput.WritingText = true;
 			Main.instance.HandleIME();
 			string newString = Main.GetInputText(_currentString);
 			if (newString != _currentString) {
@@ -51,5 +50,7 @@ namespace Terraria.ModLoader.UI
 									   1f);
 			}
 		}
+
+		public event EventHandler OnTextChange;
 	}
 }

@@ -7,9 +7,9 @@ namespace Terraria.ModLoader.UI
 	//TODO how is this different to UIInfoMessage?
 	internal class UIUpdateMessage : UIState
 	{
+		private readonly UIMessageBox _message = new UIMessageBox("");
 		private int _gotoMenu;
 		private string _url;
-		private readonly UIMessageBox _message = new UIMessageBox("");
 
 		public override void OnInitialize() {
 			var area = new UIElement {
@@ -43,12 +43,12 @@ namespace Terraria.ModLoader.UI
 			Append(area);
 		}
 
-		internal void SetMessage(string text) {
-			_message.SetText(text);
-		}
-
 		internal void SetGotoMenu(int gotoMenu) {
 			_gotoMenu = gotoMenu;
+		}
+
+		internal void SetMessage(string text) {
+			_message.SetText(text);
 		}
 
 		internal void SetUrl(string url) {

@@ -95,6 +95,51 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
+		public override void Draw(SpriteBatch spriteBatch) {
+			base.Draw(spriteBatch);
+			for (int i = 0; i < categoryButtons.Count; i++) {
+				if (categoryButtons[i].IsMouseHovering) {
+					string text;
+					switch (i) {
+						case 0:
+							text = sortMode.ToFriendlyString();
+							break;
+						case 1:
+							text = updateFilterMode.ToFriendlyString();
+							break;
+						case 2:
+							text = modSideFilterMode.ToFriendlyString();
+							break;
+						case 3:
+							text = searchFilterMode.ToFriendlyString();
+							break;
+						default:
+							text = "None";
+							break;
+					}
+
+					UICommon.DrawHoverStringInBounds(spriteBatch, text);
+					return;
+				}
+			}
+
+			if (_updateAvailable) {
+				_updateAvailable = false;
+				Interface.updateMessage.SetMessage(_updateText);
+				Interface.updateMessage.SetGotoMenu(Interface.modBrowserID);
+				Interface.updateMessage.SetUrl(_updateUrl);
+				Main.menuMode = Interface.updateMessageID;
+			}
+
+			UILinkPointNavigator.Shortcuts.BackButtonCommand = 101;
+		}
+
+		public override void OnActivate() {
+			Main.clrInput();
+			if (!loading && _items.Count <= 0)
+				PopulateModBrowser();
+		}
+
 		public override void OnInitialize() {
 			_uIElement = new UIElement {
 				Width = { Percent = 0.8f },
@@ -291,43 +336,23 @@ namespace Terraria.ModLoader.UI
 			_uIPanel.Append(upperMenuContainer);
 		}
 
-		public override void Draw(SpriteBatch spriteBatch) {
-			base.Draw(spriteBatch);
-			for (int i = 0; i < categoryButtons.Count; i++) {
-				if (categoryButtons[i].IsMouseHovering) {
-					string text;
-					switch (i) {
-						case 0:
-							text = sortMode.ToFriendlyString();
-							break;
-						case 1:
-							text = updateFilterMode.ToFriendlyString();
-							break;
-						case 2:
-							text = modSideFilterMode.ToFriendlyString();
-							break;
-						case 3:
-							text = searchFilterMode.ToFriendlyString();
-							break;
-						default:
-							text = "None";
-							break;
-					}
-
-					UICommon.DrawHoverStringInBounds(spriteBatch, text);
-					return;
-				}
+		public override void Update(GameTime gameTime) {
+			base.Update(gameTime);
+			if (!updateNeeded) return;
+			updateNeeded = false;
+			if (!loading) _uIPanel.RemoveChild(_uILoader);
+			filter = filterTextBox.Text;
+			modList.Clear();
+			modList.AddRange(_items.Where(item => item.PassFilters()));
+			bool hasNoModsFoundNotif = modList.HasChild(uINoModsFoundText);
+			if (modList.Count <= 0 && !hasNoModsFoundNotif)
+				modList.Add(uINoModsFoundText);
+			else if (hasNoModsFoundNotif)
+				modList.RemoveChild(uINoModsFoundText);
+			_uIElement.RemoveChild(_updateAllButton);
+			if (SpecialModPackFilter == null && _items.Count(x => x.update && !x.updateIsDowngrade) > 0) {
+				_uIElement.Append(_updateAllButton);
 			}
-
-			if (_updateAvailable) {
-				_updateAvailable = false;
-				Interface.updateMessage.SetMessage(_updateText);
-				Interface.updateMessage.SetGotoMenu(Interface.modBrowserID);
-				Interface.updateMessage.SetUrl(_updateUrl);
-				Main.menuMode = Interface.updateMessageID;
-			}
-
-			UILinkPointNavigator.Shortcuts.BackButtonCommand = 101;
 		}
 
 		public static void BackClick(UIMouseEvent evt, UIElement listeningElement) {
@@ -357,31 +382,6 @@ namespace Terraria.ModLoader.UI
 			Interface.modBrowser.aModUpdated = false;
 			Interface.modBrowser.aNewModDownloaded = false;
 			Interface.modBrowser.anEnabledModDownloaded = false;
-		}
-
-		public override void Update(GameTime gameTime) {
-			base.Update(gameTime);
-			if (!updateNeeded) return;
-			updateNeeded = false;
-			if (!loading) _uIPanel.RemoveChild(_uILoader);
-			filter = filterTextBox.Text;
-			modList.Clear();
-			modList.AddRange(_items.Where(item => item.PassFilters()));
-			bool hasNoModsFoundNotif = modList.HasChild(uINoModsFoundText);
-			if (modList.Count <= 0 && !hasNoModsFoundNotif)
-				modList.Add(uINoModsFoundText);
-			else if (hasNoModsFoundNotif)
-				modList.RemoveChild(uINoModsFoundText);
-			_uIElement.RemoveChild(_updateAllButton);
-			if (SpecialModPackFilter == null && _items.Count(x => x.update && !x.updateIsDowngrade) > 0) {
-				_uIElement.Append(_updateAllButton);
-			}
-		}
-
-		public override void OnActivate() {
-			Main.clrInput();
-			if (!loading && _items.Count <= 0)
-				PopulateModBrowser();
 		}
 
 		public void UploadComplete(object sender, UploadValuesCompletedEventArgs e) {
@@ -435,56 +435,39 @@ namespace Terraria.ModLoader.UI
 			Interface.errorMessage.Show(Language.GetTextValue("tModLoader.MBServerResponse", message), Interface.managePublishedID);
 		}
 
-		private void ReloadList(UIMouseEvent evt, UIElement listeningElement) {
-			if (!loading) {
-				Main.PlaySound(SoundID.MenuOpen);
-				PopulateModBrowser();
-			}
+		private void DownloadMods(List<string> specialModPackFilter, string specialModPackFilterTitle) {
+			Main.PlaySound(SoundID.MenuTick);
+			Interface.downloadMods.SetDownloading(specialModPackFilterTitle);
+			Interface.downloadMods.SetModsToDownload(specialModPackFilter, _items);
+			Interface.modBrowser.updateNeeded = true;
+			Main.menuMode = Interface.downloadModsID;
 		}
 
-		private void PopulateModBrowser() {
-			loading = true;
-			SpecialModPackFilter = null;
-			SpecialModPackFilterTitle = null;
-			_reloadButton.SetText(Language.GetTextValue("tModLoader.MBGettingData"));
-			SetHeading(Language.GetTextValue("tModLoader.MenuModBrowser"));
-			_uIPanel.Append(_uILoader);
-			modList.Clear();
-			_items.Clear();
-			modList.Deactivate();
-			try {
-				ServicePointManager.Expect100Continue = false;
-				string url = "http://javid.ddns.net/tModLoader/listmods.php";
-				var values = new NameValueCollection {
-					{ "modloaderversion", ModLoader.versionedName },
-					{ "platform", ModLoader.compressedPlatformRepresentation }
-				};
-				using (WebClient client = new WebClient()) {
-					ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, policyErrors) => { return true; };
-					client.UploadValuesCompleted += UploadComplete;
-					client.UploadValuesAsync(new Uri(url), "POST", values);
-				}
-			}
-			catch (WebException e) {
-				ShowOfflineTroubleshootingMessage();
-				if (e.Status == WebExceptionStatus.Timeout) {
-					SetHeading(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", Language.GetTextValue("tModLoader.MBBusy")));
-					return;
-				}
+		//unused
+		//public XmlDocument GetDataFromUrl(string url)
+		//{
+		//	XmlDocument urlData = new XmlDocument();
+		//	HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);
+		//	rq.Timeout = 5000;
+		//	HttpWebResponse response = rq.GetResponse() as HttpWebResponse;
+		//	using (Stream responseStream = response.GetResponseStream())
+		//	{
+		//		XmlTextReader reader = new XmlTextReader(responseStream);
+		//		urlData.Load(reader);
+		//	}
+		//	return urlData;
+		//}
 
-				if (e.Status == WebExceptionStatus.ProtocolError) {
-					var resp = (HttpWebResponse)e.Response;
-					if (resp.StatusCode == HttpStatusCode.NotFound) {
-						SetHeading(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", resp.StatusCode));
-						return;
-					}
-
-					SetHeading(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", resp.StatusCode));
+		private HttpStatusCode GetHttpStatusCode(Exception err) {
+			if (err is WebException) {
+				WebException we = (WebException)err;
+				if (we.Response is HttpWebResponse) {
+					HttpWebResponse response = (HttpWebResponse)we.Response;
+					return response.StatusCode;
 				}
 			}
-			catch (Exception e) {
-				LogModBrowserException(e);
-			}
+
+			return 0;
 		}
 
 		private void PopulateFromJson(LocalMod[] installedMods, string json) {
@@ -551,12 +534,56 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
-		private void DownloadMods(List<string> specialModPackFilter, string specialModPackFilterTitle) {
-			Main.PlaySound(SoundID.MenuTick);
-			Interface.downloadMods.SetDownloading(specialModPackFilterTitle);
-			Interface.downloadMods.SetModsToDownload(specialModPackFilter, _items);
-			Interface.modBrowser.updateNeeded = true;
-			Main.menuMode = Interface.downloadModsID;
+		private void PopulateModBrowser() {
+			loading = true;
+			SpecialModPackFilter = null;
+			SpecialModPackFilterTitle = null;
+			_reloadButton.SetText(Language.GetTextValue("tModLoader.MBGettingData"));
+			SetHeading(Language.GetTextValue("tModLoader.MenuModBrowser"));
+			_uIPanel.Append(_uILoader);
+			modList.Clear();
+			_items.Clear();
+			modList.Deactivate();
+			try {
+				ServicePointManager.Expect100Continue = false;
+				string url = "http://javid.ddns.net/tModLoader/listmods.php";
+				var values = new NameValueCollection {
+					{ "modloaderversion", ModLoader.versionedName },
+					{ "platform", ModLoader.compressedPlatformRepresentation }
+				};
+				using (WebClient client = new WebClient()) {
+					ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, policyErrors) => { return true; };
+					client.UploadValuesCompleted += UploadComplete;
+					client.UploadValuesAsync(new Uri(url), "POST", values);
+				}
+			}
+			catch (WebException e) {
+				ShowOfflineTroubleshootingMessage();
+				if (e.Status == WebExceptionStatus.Timeout) {
+					SetHeading(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", Language.GetTextValue("tModLoader.MBBusy")));
+					return;
+				}
+
+				if (e.Status == WebExceptionStatus.ProtocolError) {
+					var resp = (HttpWebResponse)e.Response;
+					if (resp.StatusCode == HttpStatusCode.NotFound) {
+						SetHeading(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", resp.StatusCode));
+						return;
+					}
+
+					SetHeading(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", resp.StatusCode));
+				}
+			}
+			catch (Exception e) {
+				LogModBrowserException(e);
+			}
+		}
+
+		private void ReloadList(UIMouseEvent evt, UIElement listeningElement) {
+			if (!loading) {
+				Main.PlaySound(SoundID.MenuOpen);
+				PopulateModBrowser();
+			}
 		}
 
 		private void SetHeading(string heading) {
@@ -573,33 +600,6 @@ namespace Terraria.ModLoader.UI
 			modList.Add(message);
 			message.SetScrollbar(new UIScrollbar());
 			_uIPanel.RemoveChild(_uILoader);
-		}
-
-		//unused
-		//public XmlDocument GetDataFromUrl(string url)
-		//{
-		//	XmlDocument urlData = new XmlDocument();
-		//	HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(url);
-		//	rq.Timeout = 5000;
-		//	HttpWebResponse response = rq.GetResponse() as HttpWebResponse;
-		//	using (Stream responseStream = response.GetResponseStream())
-		//	{
-		//		XmlTextReader reader = new XmlTextReader(responseStream);
-		//		urlData.Load(reader);
-		//	}
-		//	return urlData;
-		//}
-
-		private HttpStatusCode GetHttpStatusCode(Exception err) {
-			if (err is WebException) {
-				WebException we = (WebException)err;
-				if (we.Response is HttpWebResponse) {
-					HttpWebResponse response = (HttpWebResponse)we.Response;
-					return response.StatusCode;
-				}
-			}
-
-			return 0;
 		}
 	}
 

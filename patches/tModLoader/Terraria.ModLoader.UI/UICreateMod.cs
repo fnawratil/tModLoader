@@ -11,9 +11,17 @@ namespace Terraria.ModLoader.UI
 	internal class UICreateMod : UIState
 	{
 		private UITextPanel<string> _messagePanel;
-		private UIFocusInputTextField _modName;
-		private UIFocusInputTextField _modDisplayName;
 		private UIFocusInputTextField _modAuthor;
+		private UIFocusInputTextField _modDisplayName;
+		private UIFocusInputTextField _modName;
+
+		public override void OnActivate() {
+			base.OnActivate();
+			_modName.SetText("");
+			_modDisplayName.SetText("");
+			_modAuthor.SetText("");
+			_messagePanel.SetText("");
+		}
 
 		public override void OnInitialize() {
 			var uIElement = new UIElement {
@@ -108,14 +116,6 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
-		public override void OnActivate() {
-			base.OnActivate();
-			_modName.SetText("");
-			_modDisplayName.SetText("");
-			_modAuthor.SetText("");
-			_messagePanel.SetText("");
-		}
-
 		private void OnClickBack(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(SoundID.MenuClose);
 			Main.menuMode = Interface.modSourcesID;
@@ -173,20 +173,20 @@ namespace {modNameTrimmed}
 </Project>");
 				string propertiesFolder = sourceFolder + Path.DirectorySeparatorChar + "Properties";
 				Directory.CreateDirectory(propertiesFolder);
-				File.WriteAllText(Path.Combine(propertiesFolder, $"launchSettings.json"), $@"{{
-  ""profiles"": {{
-    ""Terraria"": {{
+				File.WriteAllText(Path.Combine(propertiesFolder, "launchSettings.json"), @"{
+  ""profiles"": {
+    ""Terraria"": {
       ""commandName"": ""Executable"",
       ""executablePath"": ""$(tMLPath)"",
       ""workingDirectory"": ""$(TerrariaSteamPath)""
-    }},
-    ""TerrariaServer"": {{
+    },
+    ""TerrariaServer"": {
       ""commandName"": ""Executable"",
       ""executablePath"": ""$(tMLServerPath)"",
       ""workingDirectory"": ""$(TerrariaSteamPath)""
-    }}
-  }}
-}}");
+    }
+  }
+}");
 			}
 		}
 	}

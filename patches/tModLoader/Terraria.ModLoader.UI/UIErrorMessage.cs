@@ -1,6 +1,6 @@
-using Microsoft.Xna.Framework;
 using System;
 using System.Diagnostics;
+using Microsoft.Xna.Framework;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
@@ -10,17 +10,31 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIErrorMessage : UIState
 	{
-		private UIMessageBox _messageBox;
 		private UIElement _area;
 		private UITextPanel<string> _continueButton; // label changes to retry/exit
 		private UITextPanel<string> _exitAndDisableAllButton;
-		private UITextPanel<string> _webHelpButton;
-		private UITextPanel<string> _skipLoadButton;
-		private string _message;
 		private int _gotoMenu;
-		private string _webHelpUrl;
+		private string _message;
+		private UIMessageBox _messageBox;
 		private bool _showRetry;
 		private bool _showSkip;
+		private UITextPanel<string> _skipLoadButton;
+		private UITextPanel<string> _webHelpButton;
+		private string _webHelpUrl;
+
+		public override void OnActivate() {
+			Netplay.disconnect = true;
+
+			_messageBox.SetText(_message);
+
+			var continueKey = _gotoMenu < 0 ? "Exit" : _showRetry ? "Retry" : "Continue";
+			_continueButton.SetText(Language.GetTextValue("tModLoader." + continueKey));
+			_continueButton.TextColor = _gotoMenu >= 0 ? Color.White : Color.Red;
+
+			_area.AddOrRemoveChild(_webHelpButton, string.IsNullOrEmpty(_webHelpUrl));
+			_area.AddOrRemoveChild(_skipLoadButton, _showSkip);
+			_area.AddOrRemoveChild(_exitAndDisableAllButton, _gotoMenu < 0);
+		}
 
 		public override void OnInitialize() {
 			_area = new UIElement {
@@ -76,20 +90,6 @@ namespace Terraria.ModLoader.UI
 			Append(_area);
 		}
 
-		public override void OnActivate() {
-			Netplay.disconnect = true;
-
-			_messageBox.SetText(_message);
-
-			var continueKey = _gotoMenu < 0 ? "Exit" : _showRetry ? "Retry" : "Continue";
-			_continueButton.SetText(Language.GetTextValue("tModLoader." + continueKey));
-			_continueButton.TextColor = _gotoMenu >= 0 ? Color.White : Color.Red;
-
-			_area.AddOrRemoveChild(_webHelpButton, string.IsNullOrEmpty(_webHelpUrl));
-			_area.AddOrRemoveChild(_skipLoadButton, _showSkip);
-			_area.AddOrRemoveChild(_exitAndDisableAllButton, _gotoMenu < 0);
-		}
-
 		internal void Show(string message, int gotoMenu, string webHelpUrl = "", bool showRetry = false, bool showSkip = false) {
 			_message = message;
 			_gotoMenu = gotoMenu;
@@ -120,15 +120,15 @@ namespace Terraria.ModLoader.UI
 			Process.Start(Logging.LogPath);
 		}
 
-		private void VisitRegisterWebpage(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(SoundID.MenuOpen);
-			Process.Start(_webHelpUrl);
-		}
-
 		private void SkipLoad(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(SoundID.MenuOpen);
 			ModLoader.skipLoad = true;
 			Main.menuMode = _gotoMenu;
+		}
+
+		private void VisitRegisterWebpage(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(SoundID.MenuOpen);
+			Process.Start(_webHelpUrl);
 		}
 	}
 }

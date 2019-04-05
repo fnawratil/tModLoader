@@ -1,11 +1,11 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria.Graphics;
 using Terraria.UI;
 
@@ -13,20 +13,50 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIMemoryBar : UIElement
 	{
-		private class MemoryBarItem
-		{
-			internal readonly string tooltip;
-			internal readonly long memory;
-			internal readonly Color drawColor;
+		internal static bool recalculateMemoryNeeded = true;
 
-			public MemoryBarItem(string tooltip, long memory, Color drawColor) {
-				this.tooltip = tooltip;
-				this.memory = memory;
-				this.drawColor = drawColor;
+		/*
+		[DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		internal static extern bool IsWow64Process([In] IntPtr process, [Out] out bool wow64Process);
+
+		private static bool IsWin64Emulator(Process process) {
+			if ((Environment.OSVersion.Version.Major > 5)
+				|| ((Environment.OSVersion.Version.Major == 5) && (Environment.OSVersion.Version.Minor >= 1))) {
+				bool retVal;
+				return IsWow64Process(process.Handle, out retVal) && retVal;
 			}
+			return false;
 		}
 
-		internal static bool recalculateMemoryNeeded = true;
+		private long CalculateAvailableMemory(long availableMemory) {
+			Process currentProcess = Process.GetCurrentProcess();
+			foreach (var p in Process.GetProcesses()) {
+				try {
+					if (IsWin64Emulator(p)) {
+						availableMemory -= (p.WorkingSet64);
+					}
+				}
+				catch (Win32Exception ex) {
+					if (ex.NativeErrorCode != 0x00000005) {
+						//throw;
+					}
+				}
+			}
+			return Math.Max(0, availableMemory);
+		}
+		*/
+
+		private static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+
+		private readonly Color[] _colors = {
+			new Color(232, 76, 61), //red
+			new Color(155, 88, 181), //purple
+			new Color(27, 188, 155), //aqua
+			new Color(243, 156, 17), //orange
+			new Color(45, 204, 112), //green
+			new Color(241, 196, 15) //yellow
+		};
 
 		private readonly Texture2D _innerPanelTexture;
 		private readonly List<MemoryBarItem> _memoryBarItems;
@@ -89,14 +119,15 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
-		private readonly Color[] _colors = {
-			new Color(232, 76, 61), //red
-			new Color(155, 88, 181), //purple
-			new Color(27, 188, 155), //aqua
-			new Color(243, 156, 17), //orange
-			new Color(45, 204, 112), //green
-			new Color(241, 196, 15), //yellow
-		};
+		public static long GetAvailableMemory() {
+			var pc = new PerformanceCounter("Mono Memory", "Available Physical Memory");
+			return pc.RawValue;
+		}
+
+		public static long GetTotalMemory() {
+			var pc = new PerformanceCounter("Mono Memory", "Total Physical Memory");
+			return pc.RawValue;
+		}
 
 		private void RecalculateMemory() {
 			_memoryBarItems.Clear();
@@ -149,50 +180,6 @@ namespace Terraria.ModLoader.UI
 			recalculateMemoryNeeded = false;
 		}
 
-		public static long GetAvailableMemory() {
-			var pc = new PerformanceCounter("Mono Memory", "Available Physical Memory");
-			return pc.RawValue;
-		}
-
-		public static long GetTotalMemory() {
-			var pc = new PerformanceCounter("Mono Memory", "Total Physical Memory");
-			return pc.RawValue;
-		}
-
-		/*
-		[DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		internal static extern bool IsWow64Process([In] IntPtr process, [Out] out bool wow64Process);
-
-		private static bool IsWin64Emulator(Process process) {
-			if ((Environment.OSVersion.Version.Major > 5)
-				|| ((Environment.OSVersion.Version.Major == 5) && (Environment.OSVersion.Version.Minor >= 1))) {
-				bool retVal;
-				return IsWow64Process(process.Handle, out retVal) && retVal;
-			}
-			return false;
-		}
-
-		private long CalculateAvailableMemory(long availableMemory) {
-			Process currentProcess = Process.GetCurrentProcess();
-			foreach (var p in Process.GetProcesses()) {
-				try {
-					if (IsWin64Emulator(p)) {
-						availableMemory -= (p.WorkingSet64);
-					}
-				}
-				catch (Win32Exception ex) {
-					if (ex.NativeErrorCode != 0x00000005) {
-						//throw;
-					}
-				}
-			}
-			return Math.Max(0, availableMemory);
-		}
-		*/
-
-		private static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-
 		private static string SizeSuffix(long value, int decimalPlaces = 1) {
 			if (value < 0) {
 				return "-" + SizeSuffix(-value);
@@ -216,9 +203,22 @@ namespace Terraria.ModLoader.UI
 				adjustedSize /= 1024;
 			}
 
-			return string.Format("{{0:n" + decimalPlaces + "}} {1}",
+			return string.Format("{0:n" + decimalPlaces + "} {1}",
 								 adjustedSize,
 								 SizeSuffixes[mag]);
+		}
+
+		private class MemoryBarItem
+		{
+			internal readonly Color drawColor;
+			internal readonly long memory;
+			internal readonly string tooltip;
+
+			public MemoryBarItem(string tooltip, long memory, Color drawColor) {
+				this.tooltip = tooltip;
+				this.memory = memory;
+				this.drawColor = drawColor;
+			}
 		}
 	}
 }

@@ -1,6 +1,6 @@
-using log4net.Core;
 using System;
 using System.CodeDom.Compiler;
+using log4net.Core;
 using Terraria.Localization;
 using Terraria.UI;
 
@@ -10,6 +10,8 @@ namespace Terraria.ModLoader.UI
 	internal class UIBuildMod : UIState, ModCompile.IBuildStatus
 	{
 		private UILoadProgress loadProgress;
+
+		private string mod;
 
 		public override void OnInitialize() {
 			loadProgress = new UILoadProgress {
@@ -24,15 +26,13 @@ namespace Terraria.ModLoader.UI
 		}
 
 		public void SetProgress(int num, int max) {
-			loadProgress.SetProgress((float)num / (float)max);
+			loadProgress.SetProgress(num / (float)max);
 		}
 
 		public void SetStatus(string msg) {
 			Logging.tML.Info(msg);
 			loadProgress.SetText(msg);
 		}
-
-		private string mod;
 
 		public void SetMod(string modName) {
 			mod = modName;

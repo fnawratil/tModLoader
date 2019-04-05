@@ -1,5 +1,5 @@
-using Microsoft.Xna.Framework;
 using System;
+using Microsoft.Xna.Framework;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
 using Terraria.UI;
@@ -9,10 +9,23 @@ namespace Terraria.ModLoader.UI
 	internal class UILoadMods : UIState
 	{
 		public int modCount;
+		private UILoadProgress _loadProgress;
 
 		private string _stageText;
-		private UILoadProgress _loadProgress;
 		private UIText _subProgress;
+
+		public string SubProgressText {
+			set => _subProgress?.SetText(value);
+		}
+
+		public override void OnActivate() {
+			ModLoader.BeginLoad();
+			GLCallLocker.ActionsAreSpeedrun = true;
+		}
+
+		public override void OnDeactivate() {
+			GLCallLocker.ActionsAreSpeedrun = false;
+		}
 
 		public override void OnInitialize() {
 			_loadProgress = new UILoadProgress {
@@ -33,22 +46,14 @@ namespace Terraria.ModLoader.UI
 			Append(_subProgress);
 		}
 
-		public override void OnActivate() {
-			ModLoader.BeginLoad();
-			GLCallLocker.ActionsAreSpeedrun = true;
-		}
-
-		public override void OnDeactivate() {
-			GLCallLocker.ActionsAreSpeedrun = false;
-		}
-
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime);
 			GLCallLocker.SpeedrunActions();
 		}
 
-		public string SubProgressText {
-			set => _subProgress?.SetText(value);
+		public void SetCurrentMod(int i, string mod) {
+			SetProgressText(Language.GetTextValue(_stageText, mod));
+			_loadProgress?.SetProgress(i / (float)modCount);
 		}
 
 		public void SetLoadStage(string stageText, int modCount = -1) {
@@ -67,11 +72,6 @@ namespace Terraria.ModLoader.UI
 				Console.WriteLine(text);
 			else
 				_loadProgress.SetText(text);
-		}
-
-		public void SetCurrentMod(int i, string mod) {
-			SetProgressText(Language.GetTextValue(_stageText, mod));
-			_loadProgress?.SetProgress(i / (float)modCount);
 		}
 	}
 }

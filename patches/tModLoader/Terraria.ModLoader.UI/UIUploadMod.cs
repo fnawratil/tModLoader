@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
@@ -8,9 +9,14 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIUploadMod : UIState
 	{
+		private Action _cancelAction;
 		private UILoadProgress _loadProgress;
 		private string _name;
-		private Action _cancelAction;
+
+		public override void OnActivate() {
+			_loadProgress.SetText("Uploading: " + _name);
+			_loadProgress.SetProgress(0f);
+		}
 
 		public override void OnInitialize() {
 			_loadProgress = new UILoadProgress {
@@ -32,17 +38,12 @@ namespace Terraria.ModLoader.UI
 			Append(cancel);
 		}
 
-		public override void OnActivate() {
-			_loadProgress.SetText("Uploading: " + _name);
-			_loadProgress.SetProgress(0f);
+		public void SetCancel(Action cancelAction) {
+			_cancelAction = cancelAction;
 		}
 
 		internal void SetDownloading(string name) {
 			_name = name;
-		}
-
-		public void SetCancel(Action cancelAction) {
-			_cancelAction = cancelAction;
 		}
 
 		internal void SetProgress(UploadProgressChangedEventArgs e) => SetProgress(e.BytesSent, e.TotalBytesToSend);
@@ -52,7 +53,7 @@ namespace Terraria.ModLoader.UI
 		}
 
 		private void CancelClick(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(ID.SoundID.MenuOpen);
+			Main.PlaySound(SoundID.MenuOpen);
 			_cancelAction();
 		}
 	}

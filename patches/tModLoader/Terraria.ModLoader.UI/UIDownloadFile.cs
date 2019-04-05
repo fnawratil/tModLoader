@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using Terraria.GameContent.UI.Elements;
@@ -13,34 +14,14 @@ namespace Terraria.ModLoader.UI
 	//TODO: of all the download UIs, this one has been refactored the best
 	internal class UIDownloadFile : UIState
 	{
-		private UILoadProgress _loadProgress;
-		private string _name;
-		private string _url;
-		private string _file;
-		private Action _success;
-		private Action _failure; //TODO unused?
 		private Action _cancelAction;
 		private WebClient _client;
-
-		public override void OnInitialize() {
-			_loadProgress = new UILoadProgress {
-				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MAX_PANEL_WIDTH,
-				Height = { Pixels = 150 },
-				HAlign = 0.5f,
-				VAlign = 0.5f,
-				Top = { Pixels = 10 }
-			};
-			Append(_loadProgress);
-
-			var cancel = new UITextPanel<string>(Language.GetTextValue("UI.Cancel"), 0.75f, true) {
-				VAlign = 0.5f,
-				HAlign = 0.5f,
-				Top = { Pixels = 170 }
-			}.WithFadedMouseOver();
-			cancel.OnClick += CancelClick;
-			Append(cancel);
-		}
+		private Action _failure; //TODO unused?
+		private string _file;
+		private UILoadProgress _loadProgress;
+		private string _name;
+		private Action _success;
+		private string _url;
 
 		public override void OnActivate() {
 			_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", _name));
@@ -62,7 +43,49 @@ namespace Terraria.ModLoader.UI
 			_client.DownloadFileAsync(new Uri(_url), _file);
 		}
 
-		private void Client_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e) {
+		public override void OnInitialize() {
+			_loadProgress = new UILoadProgress {
+				Width = { Percent = 0.8f },
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
+				Height = { Pixels = 150 },
+				HAlign = 0.5f,
+				VAlign = 0.5f,
+				Top = { Pixels = 10 }
+			};
+			Append(_loadProgress);
+
+			var cancel = new UITextPanel<string>(Language.GetTextValue("UI.Cancel"), 0.75f, true) {
+				VAlign = 0.5f,
+				HAlign = 0.5f,
+				Top = { Pixels = 170 }
+			}.WithFadedMouseOver();
+			cancel.OnClick += CancelClick;
+			Append(cancel);
+		}
+
+		public void SetCancel(Action cancelAction) {
+			_cancelAction = cancelAction;
+		}
+
+		internal void SetDownloading(string name, string url, string file, Action success) {
+			_name = name;
+			_url = url;
+			_file = file;
+			_success = success;
+		}
+
+		internal void SetProgress(DownloadProgressChangedEventArgs e) => SetProgress(e.BytesReceived, e.TotalBytesToReceive);
+
+		internal void SetProgress(long count, long len) {
+			_loadProgress?.SetProgress((float)count / len);
+		}
+
+		private void CancelClick(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(SoundID.MenuOpen);
+			_cancelAction?.Invoke();
+		}
+
+		private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e) {
 			_client.Dispose();
 			_client = null;
 
@@ -86,28 +109,6 @@ namespace Terraria.ModLoader.UI
 
 		private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e) {
 			SetProgress(e);
-		}
-
-		internal void SetDownloading(string name, string url, string file, Action success) {
-			_name = name;
-			_url = url;
-			_file = file;
-			_success = success;
-		}
-
-		public void SetCancel(Action cancelAction) {
-			_cancelAction = cancelAction;
-		}
-
-		internal void SetProgress(DownloadProgressChangedEventArgs e) => SetProgress(e.BytesReceived, e.TotalBytesToReceive);
-
-		internal void SetProgress(long count, long len) {
-			_loadProgress?.SetProgress((float)count / len);
-		}
-
-		private void CancelClick(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(SoundID.MenuOpen);
-			_cancelAction?.Invoke();
 		}
 
 		private HttpStatusCode GetHttpStatusCode(Exception err) => err is WebException exc && exc.Response is HttpWebResponse response ? response.StatusCode : 0;

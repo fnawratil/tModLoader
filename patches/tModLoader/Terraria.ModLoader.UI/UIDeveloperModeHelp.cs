@@ -1,9 +1,9 @@
-﻿using Ionic.Zip;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using Ionic.Zip;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
@@ -13,45 +13,10 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIDeveloperModeHelp : UIState
 	{
-		private UIPanel _backPanel;
-		private UIImage _refAssemDirectDlButton;
-		private UITextPanel<string> _bottomButton;
 		private bool _allChecksSatisfied;
-
-		public override void OnInitialize() {
-			var area = new UIElement {
-				Width = { Percent = 0.5f },
-				Top = { Pixels = 200 },
-				Height = { Pixels = -240, Percent = 1f },
-				HAlign = 0.5f
-			};
-
-			_backPanel = new UIPanel {
-				Width = { Percent = 1f },
-				Height = { Pixels = -90, Percent = 1f },
-				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR
-			};
-			area.Append(_backPanel);
-
-			var heading = new UITextPanel<string>(Language.GetTextValue("tModLoader.MenuEnableDeveloperMode"), 0.8f, true) {
-				HAlign = 0.5f,
-				Top = { Pixels = -45 },
-				BackgroundColor = UICommon.UI_BLUE_COLOR
-			}.WithPadding(15);
-			area.Append(heading);
-
-			_bottomButton = new UITextPanel<string>(Language.GetTextValue("UI.Back"), 0.7f, true) {
-				Width = { Percent = 0.5f },
-				Height = { Pixels = 50 },
-				HAlign = 0.5f,
-				VAlign = 1f,
-				Top = { Pixels = -30 }
-			}.WithFadedMouseOver();
-			_bottomButton.OnClick += BackClick;
-			area.Append(_bottomButton);
-
-			Append(area);
-		}
+		private UIPanel _backPanel;
+		private UITextPanel<string> _bottomButton;
+		private UIImage _refAssemDirectDlButton;
 
 		public override void OnActivate() {
 			_backPanel.RemoveAllChildren();
@@ -62,7 +27,7 @@ namespace Terraria.ModLoader.UI
 				var msgBox = new UIMessageBox(text) {
 					Width = { Percent = 1f },
 					Height = { Percent = .2f },
-					Top = { Percent = (i++) / 4f + 0.05f },
+					Top = { Percent = i++ / 4f + 0.05f }
 				};
 				_backPanel.Append(msgBox);
 				return msgBox;
@@ -100,7 +65,7 @@ namespace Terraria.ModLoader.UI
 				_refAssemDirectDlButton = new UIHoverImage(icon, Language.GetTextValue("tModLoader.DMReferenceAssembliesDownload")) {
 					Left = { Pixels = -1 },
 					Top = { Pixels = -1 },
-					VAlign = 1,
+					VAlign = 1
 				};
 				_refAssemDirectDlButton.OnClick += (evt, _) => DirectDownloadRefAssemblies();
 				refAssemMsgBox.Append(_refAssemDirectDlButton);
@@ -113,16 +78,72 @@ namespace Terraria.ModLoader.UI
 			_bottomButton.SetText(_allChecksSatisfied ? Language.GetTextValue("tModLoader.Continue") : Language.GetTextValue("UI.Back"));
 		}
 
+		public override void OnInitialize() {
+			var area = new UIElement {
+				Width = { Percent = 0.5f },
+				Top = { Pixels = 200 },
+				Height = { Pixels = -240, Percent = 1f },
+				HAlign = 0.5f
+			};
+
+			_backPanel = new UIPanel {
+				Width = { Percent = 1f },
+				Height = { Pixels = -90, Percent = 1f },
+				BackgroundColor = UICommon.MAIN_PANEL_BG_COLOR
+			};
+			area.Append(_backPanel);
+
+			var heading = new UITextPanel<string>(Language.GetTextValue("tModLoader.MenuEnableDeveloperMode"), 0.8f, true) {
+				HAlign = 0.5f,
+				Top = { Pixels = -45 },
+				BackgroundColor = UICommon.UI_BLUE_COLOR
+			}.WithPadding(15);
+			area.Append(heading);
+
+			_bottomButton = new UITextPanel<string>(Language.GetTextValue("UI.Back"), 0.7f, true) {
+				Width = { Percent = 0.5f },
+				Height = { Pixels = 50 },
+				HAlign = 0.5f,
+				VAlign = 1f,
+				Top = { Pixels = -30 }
+			}.WithFadedMouseOver();
+			_bottomButton.OnClick += BackClick;
+			area.Append(_bottomButton);
+
+			Append(area);
+		}
+
+		private void BackClick(UIMouseEvent evt, UIElement listeningElement) {
+			if (_allChecksSatisfied) {
+				Main.PlaySound(SoundID.MenuOpen);
+				Main.menuMode = Interface.modSourcesID;
+			}
+			else {
+				Main.PlaySound(SoundID.MenuClose);
+				Main.menuMode = 0;
+			}
+		}
+
 		private void DevelopingWithVisualStudio() {
 			Process.Start("https://github.com/blushiemagic/tModLoader/wiki/Developing-with-Visual-Studio");
 		}
 
-		private void OpenTutorial() {
-			Process.Start("https://github.com/blushiemagic/tModLoader/wiki/Basic-tModLoader-Modding-Guide");
+		private void DirectDownloadRefAssemblies() {
+			Main.PlaySound(SoundID.MenuOpen);
+			const string url = "https://tmodloader.net/dl/ext/v45ReferenceAssemblies.zip"; // This never changes, maybe put it on 0.11 release only and leave it out of other release uploads.
+			string folder = Path.Combine(ModCompile.modCompileDir, "v4.5 Reference Assemblies");
+			string file = Path.Combine(folder, "v4.5 Reference Assemblies.zip");
+			Directory.CreateDirectory(folder);
+			DownloadFile("v4.5 Reference Assemblies", url, file, () => Extract(file));
 		}
 
 		private void DownloadDotNet() {
 			Process.Start("https://www.microsoft.com/net/download/thank-you/net472");
+		}
+
+		private void DownloadFile(string name, string url, string file, Action downloadModCompileComplete) {
+			Interface.downloadFile.SetDownloading(name, url, file, downloadModCompileComplete);
+			Main.menuMode = Interface.downloadFileID;
 		}
 
 		private void DownloadModCompile() {
@@ -139,15 +160,6 @@ namespace Terraria.ModLoader.UI
 				File.Copy(originalXmlFile, correctXmlFile, true);
 				File.Delete(originalXmlFile);
 			});
-		}
-
-		private void DirectDownloadRefAssemblies() {
-			Main.PlaySound(SoundID.MenuOpen);
-			const string url = "https://tmodloader.net/dl/ext/v45ReferenceAssemblies.zip"; // This never changes, maybe put it on 0.11 release only and leave it out of other release uploads.
-			string folder = Path.Combine(ModCompile.modCompileDir, "v4.5 Reference Assemblies");
-			string file = Path.Combine(folder, "v4.5 Reference Assemblies.zip");
-			Directory.CreateDirectory(folder);
-			DownloadFile("v4.5 Reference Assemblies", url, file, () => Extract(file));
 		}
 
 		private void Extract(string zipFile, bool deleteFiles = false) {
@@ -167,20 +179,8 @@ namespace Terraria.ModLoader.UI
 			Main.menuMode = Interface.developerModeHelpID;
 		}
 
-		private void DownloadFile(string name, string url, string file, Action downloadModCompileComplete) {
-			Interface.downloadFile.SetDownloading(name, url, file, downloadModCompileComplete);
-			Main.menuMode = Interface.downloadFileID;
-		}
-
-		private void BackClick(UIMouseEvent evt, UIElement listeningElement) {
-			if (_allChecksSatisfied) {
-				Main.PlaySound(SoundID.MenuOpen);
-				Main.menuMode = Interface.modSourcesID;
-			}
-			else {
-				Main.PlaySound(SoundID.MenuClose);
-				Main.menuMode = 0;
-			}
+		private void OpenTutorial() {
+			Process.Start("https://github.com/blushiemagic/tModLoader/wiki/Basic-tModLoader-Modding-Guide");
 		}
 	}
 }

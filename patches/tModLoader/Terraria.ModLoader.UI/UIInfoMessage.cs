@@ -7,15 +7,23 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIInfoMessage : UIState
 	{
-		private UIElement _area;
-		private UIMessageBox _messageBox;
-		private UITextPanel<string> _button;
-		private UITextPanel<string> _buttonAlt;
-		private UIState _gotoState;
-		private string _message;
-		private int _gotoMenu;
 		private Action _altAction;
 		private string _altText;
+		private UIElement _area;
+		private UITextPanel<string> _button;
+		private UITextPanel<string> _buttonAlt;
+		private int _gotoMenu;
+		private UIState _gotoState;
+		private string _message;
+		private UIMessageBox _messageBox;
+
+		public override void OnActivate() {
+			_messageBox.SetText(_message);
+			_buttonAlt.SetText(_altText);
+			bool showAlt = !string.IsNullOrEmpty(_altText);
+			_button.Left.Percent = showAlt ? 0 : .25f;
+			_area.AddOrRemoveChild(_buttonAlt, showAlt);
+		}
 
 		public override void OnInitialize() {
 			_area = new UIElement {
@@ -70,14 +78,6 @@ namespace Terraria.ModLoader.UI
 			Append(_area);
 		}
 
-		public override void OnActivate() {
-			_messageBox.SetText(_message);
-			_buttonAlt.SetText(_altText);
-			bool showAlt = !string.IsNullOrEmpty(_altText);
-			_button.Left.Percent = showAlt ? 0 : .25f;
-			_area.AddOrRemoveChild(_buttonAlt, showAlt);
-		}
-
 		internal void Show(string message, int gotoMenu, UIState state = null, string altButtonText = "", Action altButtonAction = null) {
 			_message = message;
 			_gotoMenu = gotoMenu;
@@ -87,17 +87,17 @@ namespace Terraria.ModLoader.UI
 			Main.menuMode = Interface.infoMessageID;
 		}
 
+		private void OnClickAlt(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(10, -1, -1, 1);
+			_altAction?.Invoke();
+			Main.menuMode = _gotoMenu;
+		}
+
 		private void OnClickOk(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10, -1, -1, 1);
 			Main.menuMode = _gotoMenu;
 			if (_gotoState != null)
 				Main.MenuUI.SetState(_gotoState);
-		}
-
-		private void OnClickAlt(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(10, -1, -1, 1);
-			_altAction?.Invoke();
-			Main.menuMode = _gotoMenu;
 		}
 	}
 }

@@ -8,9 +8,14 @@ namespace Terraria.ModLoader.UI
 	//TODO: yet another progress UI, this time with cancel button
 	internal class UIDownloadMod : UIState
 	{
+		private Action _cancelAction;
 		private UILoadProgress _loadProgress;
 		private string _name;
-		private Action _cancelAction;
+
+		public override void OnActivate() {
+			_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", _name));
+			_loadProgress.SetProgress(0f);
+		}
 
 		public override void OnInitialize() {
 			_loadProgress = new UILoadProgress {
@@ -32,18 +37,13 @@ namespace Terraria.ModLoader.UI
 			Append(cancel);
 		}
 
-		public override void OnActivate() {
-			_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", _name));
-			_loadProgress.SetProgress(0f);
+		public void SetCancel(Action cancelAction) {
+			_cancelAction = cancelAction;
 		}
 
 		internal void SetDownloading(string name) {
 			Logging.tML.InfoFormat("Downloading Mod: {0}", name);
 			_name = name;
-		}
-
-		public void SetCancel(Action cancelAction) {
-			_cancelAction = cancelAction;
 		}
 
 		internal void SetProgress(long count, long len) {

@@ -1,15 +1,14 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Security;
 using System.Reflection;
 using System.Text;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json.Linq;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Graphics;
 using Terraria.ID;
@@ -20,37 +19,35 @@ namespace Terraria.ModLoader.UI
 {
 	internal class UIModDownloadItem : UIPanel
 	{
-		public string mod;
-		public string displayName;
-		public string version;
 		public string author;
-		public string modIconUrl;
+		public string displayName;
 		public string download;
-		public string timeStamp;
-		public string modreferences;
-		public ModSide modside;
 		public int downloads;
 		public int hot;
+		public LocalMod installed;
+		public string mod;
+		public string modIconUrl;
+		public string modreferences;
+		public ModSide modside;
+		public string timeStamp;
 		public bool update;
 		public bool updateIsDowngrade;
-		public LocalMod installed;
-
-		private UIImage _modIcon;
-		private bool _modIconWanted;
-		private bool _modIconRequested;
-		private bool _modIconReady;
-		private bool _modIconAppended; // mod icon was ready, and is now appended
-		private bool HasModIcon => modIconUrl != null;
-		private float ModIconAdjust => _modIconAppended ? 85f : 0f;
+		public string version;
 		private readonly Texture2D _dividerTexture;
 		private readonly Texture2D _innerPanelTexture;
 		private readonly UIText _modName;
-		private readonly UIScalingTextPanel<string> _updateButton;
 		private readonly UIScalingTextPanel<string> _moreInfoButton;
+		private readonly UIScalingTextPanel<string> _updateButton;
+
+		private UIImage _modIcon;
+		private bool _modIconAppended; // mod icon was ready, and is now appended
+		private bool _modIconReady;
+		private bool _modIconRequested;
+		private bool _modIconWanted;
 
 		public UIModDownloadItem(string displayName, string name, string version, string author, string modreferences, ModSide modside, string modIconUrl, string download, int downloads, int hot, string timeStamp, bool update, bool updateIsDowngrade, LocalMod installed) {
 			this.displayName = displayName;
-			this.mod = name;
+			mod = name;
 			this.version = version;
 			this.author = author;
 			this.modreferences = modreferences;
@@ -91,7 +88,7 @@ namespace Terraria.ModLoader.UI
 			Append(_moreInfoButton);
 
 			if (update || installed == null) {
-				_updateButton = new UIScalingTextPanel<string>(this.update ? (updateIsDowngrade ? Language.GetTextValue("tModLoader.MBDowngrade") : Language.GetTextValue("tModLoader.MBUpdate")) : Language.GetTextValue("tModLoader.MBDownload"), 1f,
+				_updateButton = new UIScalingTextPanel<string>(this.update ? updateIsDowngrade ? Language.GetTextValue("tModLoader.MBDowngrade") : Language.GetTextValue("tModLoader.MBUpdate") : Language.GetTextValue("tModLoader.MBDownload"), 1f,
 															   false);
 				_updateButton.CopyStyle(_moreInfoButton);
 				_updateButton.Width.Pixels = HasModIcon ? 120 : 200;
@@ -122,24 +119,87 @@ namespace Terraria.ModLoader.UI
 			OnDoubleClick += RequestMoreinfo;
 		}
 
+		private bool HasModIcon => modIconUrl != null;
+		private float ModIconAdjust => _modIconAppended ? 85f : 0f;
+
 		public override int CompareTo(object obj) {
 			var item = obj as UIModDownloadItem;
 			switch (Interface.modBrowser.sortMode) {
 				default:
 					return base.CompareTo(obj);
 				case ModBrowserSortMode.DisplayNameAtoZ:
-					return string.Compare(this.displayName, item?.displayName, StringComparison.Ordinal);
+					return string.Compare(displayName, item?.displayName, StringComparison.Ordinal);
 				case ModBrowserSortMode.DisplayNameZtoA:
-					return -1 * string.Compare(this.displayName, item?.displayName, StringComparison.Ordinal);
+					return -1 * string.Compare(displayName, item?.displayName, StringComparison.Ordinal);
 				case ModBrowserSortMode.DownloadsAscending:
-					return this.downloads.CompareTo(item?.downloads);
+					return downloads.CompareTo(item?.downloads);
 				case ModBrowserSortMode.DownloadsDescending:
-					return -1 * this.downloads.CompareTo(item?.downloads);
+					return -1 * downloads.CompareTo(item?.downloads);
 				case ModBrowserSortMode.RecentlyUpdated:
-					return -1 * string.Compare(this.timeStamp, item?.timeStamp, StringComparison.Ordinal);
+					return -1 * string.Compare(timeStamp, item?.timeStamp, StringComparison.Ordinal);
 				case ModBrowserSortMode.Hot:
-					return -1 * this.hot.CompareTo(item?.hot);
+					return -1 * hot.CompareTo(item?.hot);
 			}
+		}
+
+		public override void MouseOut(UIMouseEvent evt) {
+			base.MouseOut(evt);
+			BackgroundColor = new Color(63, 82, 151) * 0.7f;
+			BorderColor = new Color(89, 116, 213) * 0.7f;
+		}
+
+		public override void MouseOver(UIMouseEvent evt) {
+			base.MouseOver(evt);
+			BackgroundColor = UICommon.UI_BLUE_COLOR;
+			BorderColor = new Color(89, 116, 213);
+		}
+
+		public override void Update(GameTime gameTime) {
+			base.Update(gameTime);
+			if (_modIconWanted && !_modIconRequested) {
+				_modIconRequested = true;
+				using (var client = new WebClient()) {
+					client.DownloadDataCompleted += IconDownloadComplete;
+					client.DownloadDataAsync(new Uri(modIconUrl));
+				}
+			}
+
+			if (_modIconReady) {
+				_modIconReady = false;
+				_modIconAppended = true;
+				Append(_modIcon);
+			}
+		}
+
+		protected override void DrawChildren(SpriteBatch spriteBatch) {
+			base.DrawChildren(spriteBatch);
+
+			// show authors on mod title hover, after everything else
+			// main.hoverItemName isn't drawn in UI
+			if (_modName.IsMouseHovering) {
+				string text = Language.GetTextValue("tModLoader.ModsByline", author);
+				UICommon.DrawHoverStringInBounds(spriteBatch, text);
+			}
+		}
+
+		protected override void DrawSelf(SpriteBatch spriteBatch) {
+			base.DrawSelf(spriteBatch);
+
+			if (HasModIcon && !_modIconWanted) {
+				_modIconWanted = true;
+			}
+
+			CalculatedStyle innerDimensions = GetInnerDimensions();
+			//draw divider
+			Vector2 drawPos = new Vector2(innerDimensions.X + 5f + ModIconAdjust, innerDimensions.Y + 30f);
+			spriteBatch.Draw(_dividerTexture, drawPos, null, Color.White,
+							 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f - ModIconAdjust) / 8f, 1f), SpriteEffects.None,
+							 0f);
+			// change pos for button
+			const int baseWidth = 125; // something like 1 days ago is ~110px, XX minutes ago is ~120 px (longest)
+			drawPos = new Vector2(innerDimensions.X + innerDimensions.Width - baseWidth, innerDimensions.Y + 45);
+			DrawPanel(spriteBatch, drawPos, baseWidth);
+			DrawTimeText(spriteBatch, drawPos + new Vector2(0f, 2f), baseWidth); // x offset (padding) to do in method
 		}
 
 		public bool PassFilters() {
@@ -176,41 +236,74 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
-		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			base.DrawSelf(spriteBatch);
-
-			if (HasModIcon && !_modIconWanted) {
-				_modIconWanted = true;
-			}
-
-			CalculatedStyle innerDimensions = GetInnerDimensions();
-			//draw divider
-			Vector2 drawPos = new Vector2(innerDimensions.X + 5f + ModIconAdjust, innerDimensions.Y + 30f);
-			spriteBatch.Draw(this._dividerTexture, drawPos, null, Color.White,
-							 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f - ModIconAdjust) / 8f, 1f), SpriteEffects.None,
-							 0f);
-			// change pos for button
-			const int baseWidth = 125; // something like 1 days ago is ~110px, XX minutes ago is ~120 px (longest)
-			drawPos = new Vector2(innerDimensions.X + innerDimensions.Width - baseWidth, innerDimensions.Y + 45);
-			DrawPanel(spriteBatch, drawPos, baseWidth);
-			DrawTimeText(spriteBatch, drawPos + new Vector2(0f, 2f), baseWidth); // x offset (padding) to do in method
+		internal void DownloadMod(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(SoundID.MenuTick);
+			Interface.downloadMods.SetDownloading("Mod");
+			Interface.downloadMods.SetModsToDownload(new List<string> { mod }, new List<UIModDownloadItem> { this });
+			Interface.modBrowser.updateNeeded = true;
+			Main.menuMode = Interface.downloadModsID;
 		}
 
-		public override void Update(GameTime gameTime) {
-			base.Update(gameTime);
-			if (_modIconWanted && !_modIconRequested) {
-				_modIconRequested = true;
-				using (var client = new WebClient()) {
-					client.DownloadDataCompleted += IconDownloadComplete;
-					client.DownloadDataAsync(new Uri(modIconUrl));
-				}
+		internal void Moreinfo(object sender, UploadValuesCompletedEventArgs e) {
+			string description = Language.GetTextValue("tModLoader.ModInfoProblemTryAgain");
+			string homepage = "";
+			if (!e.Cancelled) {
+				string response = Encoding.UTF8.GetString(e.Result);
+				JObject joResponse = JObject.Parse(response);
+				description = (string)joResponse["description"];
+				homepage = (string)joResponse["homepage"];
 			}
 
-			if (_modIconReady) {
-				_modIconReady = false;
-				_modIconAppended = true;
-				Append(_modIcon);
+			Interface.modInfo.SetModName(displayName);
+			Interface.modInfo.SetModInfo(description);
+			Interface.modInfo.SetMod(installed);
+			Interface.modInfo.SetGotoMenu(Interface.modBrowserID);
+			Interface.modInfo.SetUrl(homepage);
+			Main.menuMode = Interface.modInfoID;
+		}
+
+		internal void RequestMoreinfo(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(SoundID.MenuOpen);
+			try {
+				ServicePointManager.Expect100Continue = false;
+				string url = "http://javid.ddns.net/tModLoader/moddescription.php";
+				var values = new NameValueCollection {
+					{ "modname", mod }
+				};
+				using (WebClient client = new WebClient()) {
+					ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, policyErrors) => { return true; };
+					client.UploadValuesCompleted += Moreinfo;
+					client.UploadValuesAsync(new Uri(url), "POST", values);
+				}
 			}
+			catch (Exception e) {
+				UIModBrowser.LogModBrowserException(e);
+			}
+		}
+
+		private void DrawPanel(SpriteBatch spriteBatch, Vector2 position, float width) {
+			spriteBatch.Draw(_innerPanelTexture, position, new Rectangle(0, 0, 8, _innerPanelTexture.Height), Color.White);
+			spriteBatch.Draw(_innerPanelTexture, new Vector2(position.X + 8f, position.Y), new Rectangle(8, 0, 8, _innerPanelTexture.Height), Color.White,
+							 0f, Vector2.Zero, new Vector2((width - 16f) / 8f, 1f), SpriteEffects.None,
+							 0f);
+			spriteBatch.Draw(_innerPanelTexture, new Vector2(position.X + width - 8f, position.Y), new Rectangle(16, 0, 8, _innerPanelTexture.Height), Color.White);
+		}
+
+		private void DrawTimeText(SpriteBatch spriteBatch, Vector2 drawPos, int baseWidth) {
+			if (timeStamp == "0000-00-00 00:00:00") {
+				return;
+			}
+
+			try {
+				var myDateTime = DateTime.Parse(timeStamp); // parse date
+				string text = TimeHelper.HumanTimeSpanString(myDateTime); // get time text
+				int textWidth = (int)Main.fontMouseText.MeasureString(text).X; // measure text width
+				int diffWidth = baseWidth - textWidth; // get difference
+				drawPos.X += diffWidth * 0.5f; // add difference as padding
+				Utils.DrawBorderString(spriteBatch, text, drawPos, Color.White,
+									   1f, 0f, 0f, -1);
+			}
+			catch { }
 		}
 
 		private void IconDownloadComplete(object sender, DownloadDataCompletedEventArgs e) {
@@ -235,109 +328,15 @@ namespace Terraria.ModLoader.UI
 				_updateButton.Left.Set(_moreInfoButton.Width.Pixels + 5f, 0f);
 			}
 		}
-
-		protected override void DrawChildren(SpriteBatch spriteBatch) {
-			base.DrawChildren(spriteBatch);
-
-			// show authors on mod title hover, after everything else
-			// main.hoverItemName isn't drawn in UI
-			if (_modName.IsMouseHovering) {
-				string text = Language.GetTextValue("tModLoader.ModsByline", author);
-				UICommon.DrawHoverStringInBounds(spriteBatch, text);
-			}
-		}
-
-		private void DrawPanel(SpriteBatch spriteBatch, Vector2 position, float width) {
-			spriteBatch.Draw(_innerPanelTexture, position, new Rectangle?(new Rectangle(0, 0, 8, _innerPanelTexture.Height)), Color.White);
-			spriteBatch.Draw(_innerPanelTexture, new Vector2(position.X + 8f, position.Y), new Rectangle?(new Rectangle(8, 0, 8, _innerPanelTexture.Height)), Color.White,
-							 0f, Vector2.Zero, new Vector2((width - 16f) / 8f, 1f), SpriteEffects.None,
-							 0f);
-			spriteBatch.Draw(_innerPanelTexture, new Vector2(position.X + width - 8f, position.Y), new Rectangle?(new Rectangle(16, 0, 8, _innerPanelTexture.Height)), Color.White);
-		}
-
-		private void DrawTimeText(SpriteBatch spriteBatch, Vector2 drawPos, int baseWidth) {
-			if (timeStamp == "0000-00-00 00:00:00") {
-				return;
-			}
-
-			try {
-				var myDateTime = DateTime.Parse(timeStamp); // parse date
-				string text = TimeHelper.HumanTimeSpanString(myDateTime); // get time text
-				int textWidth = (int)Main.fontMouseText.MeasureString(text).X; // measure text width
-				int diffWidth = baseWidth - textWidth; // get difference
-				drawPos.X += diffWidth * 0.5f; // add difference as padding
-				Utils.DrawBorderString(spriteBatch, text, drawPos, Color.White,
-									   1f, 0f, 0f, -1);
-			}
-			catch { }
-		}
-
-		public override void MouseOver(UIMouseEvent evt) {
-			base.MouseOver(evt);
-			BackgroundColor = UICommon.UI_BLUE_COLOR;
-			BorderColor = new Color(89, 116, 213);
-		}
-
-		public override void MouseOut(UIMouseEvent evt) {
-			base.MouseOut(evt);
-			BackgroundColor = new Color(63, 82, 151) * 0.7f;
-			BorderColor = new Color(89, 116, 213) * 0.7f;
-		}
-
-		internal void DownloadMod(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(SoundID.MenuTick);
-			Interface.downloadMods.SetDownloading("Mod");
-			Interface.downloadMods.SetModsToDownload(new List<string>() { mod }, new List<UIModDownloadItem>() { this });
-			Interface.modBrowser.updateNeeded = true;
-			Main.menuMode = Interface.downloadModsID;
-		}
-
-		internal void RequestMoreinfo(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(SoundID.MenuOpen);
-			try {
-				ServicePointManager.Expect100Continue = false;
-				string url = "http://javid.ddns.net/tModLoader/moddescription.php";
-				var values = new NameValueCollection {
-					{ "modname", mod },
-				};
-				using (WebClient client = new WebClient()) {
-					ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback((sender, certificate, chain, policyErrors) => { return true; });
-					client.UploadValuesCompleted += new UploadValuesCompletedEventHandler(Moreinfo);
-					client.UploadValuesAsync(new Uri(url), "POST", values);
-				}
-			}
-			catch (Exception e) {
-				UIModBrowser.LogModBrowserException(e);
-				return;
-			}
-		}
-
-		internal void Moreinfo(object sender, UploadValuesCompletedEventArgs e) {
-			string description = Language.GetTextValue("tModLoader.ModInfoProblemTryAgain");
-			string homepage = "";
-			if (!e.Cancelled) {
-				string response = Encoding.UTF8.GetString(e.Result);
-				JObject joResponse = JObject.Parse(response);
-				description = (string)joResponse["description"];
-				homepage = (string)joResponse["homepage"];
-			}
-
-			Interface.modInfo.SetModName(displayName);
-			Interface.modInfo.SetModInfo(description);
-			Interface.modInfo.SetMod(installed);
-			Interface.modInfo.SetGotoMenu(Interface.modBrowserID);
-			Interface.modInfo.SetUrl(homepage);
-			Main.menuMode = Interface.modInfoID;
-		}
 	}
 
 	internal class TimeHelper
 	{
-		private const int SECOND = 1;
-		private const int MINUTE = 60 * SECOND;
-		private const int HOUR = 60 * MINUTE;
 		private const int DAY = 24 * HOUR;
+		private const int HOUR = 60 * MINUTE;
+		private const int MINUTE = 60 * SECOND;
 		private const int MONTH = 30 * DAY;
+		private const int SECOND = 1;
 
 		// Note: Polish has different plural for numbers ending in 2,3,4. Too complicated to do though.
 		public static string HumanTimeSpanString(DateTime yourDate) {

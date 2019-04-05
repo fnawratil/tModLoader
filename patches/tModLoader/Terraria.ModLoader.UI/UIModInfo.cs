@@ -1,8 +1,9 @@
-using Microsoft.Xna.Framework.Graphics;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 using Terraria.UI.Gamepad;
@@ -13,17 +14,46 @@ namespace Terraria.ModLoader.UI
 	{
 		public UIMessageBox modInfo;
 		public UITextPanel<string> uITextPanel;
+		internal UIScalingTextPanel<string> deleteButton;
+		internal UIScalingTextPanel<string> extractButton;
+		internal UIScalingTextPanel<string> modHomepageButton;
 
 		internal UIElement uIElement;
-		internal UIScalingTextPanel<string> modHomepageButton;
-		internal UIScalingTextPanel<string> extractButton;
-		internal UIScalingTextPanel<string> deleteButton;
 
-		private int _gotoMenu = 0;
-		private LocalMod _localMod;
-		private string _url = "";
+		private int _gotoMenu;
 		private string _info = "";
+		private LocalMod _localMod;
 		private string _modDisplayName = "";
+		private string _url = "";
+
+		public override void Draw(SpriteBatch spriteBatch) {
+			base.Draw(spriteBatch);
+			UILinkPointNavigator.Shortcuts.BackButtonCommand = 100;
+			UILinkPointNavigator.Shortcuts.BackButtonGoto = _gotoMenu;
+			if (modHomepageButton.IsMouseHovering) {
+				UICommon.DrawHoverStringInBounds(spriteBatch, _url);
+			}
+		}
+
+		public override void OnActivate() {
+			uITextPanel.SetText(Language.GetTextValue("tModLoader.ModInfoHeader") + _modDisplayName, 0.8f, true);
+			modInfo.SetText(_info);
+			if (_url.Equals("")) {
+				modHomepageButton.Remove();
+			}
+			else {
+				uIElement.Append(modHomepageButton);
+			}
+
+			if (_localMod != null) {
+				uIElement.AddOrRemoveChild(deleteButton, ModLoader.Mods.All(x => x.Name != _localMod.Name));
+				uIElement.Append(extractButton);
+			}
+			else {
+				deleteButton.Remove();
+				extractButton.Remove();
+			}
+		}
 
 		public override void OnInitialize() {
 			uIElement = new UIElement {
@@ -103,6 +133,14 @@ namespace Terraria.ModLoader.UI
 			Append(uIElement);
 		}
 
+		internal void SetGotoMenu(int gotoMenu) {
+			_gotoMenu = gotoMenu;
+		}
+
+		internal void SetMod(LocalMod mod) {
+			_localMod = mod;
+		}
+
 		// TODO use Show pattern
 		internal void SetModInfo(string text) {
 			_info = text;
@@ -115,16 +153,8 @@ namespace Terraria.ModLoader.UI
 			_modDisplayName = text;
 		}
 
-		internal void SetGotoMenu(int gotoMenu) {
-			_gotoMenu = gotoMenu;
-		}
-
 		internal void SetUrl(string url) {
 			_url = url;
-		}
-
-		internal void SetMod(LocalMod mod) {
-			_localMod = mod;
 		}
 
 		private void BackClick(UIMouseEvent evt, UIElement listeningElement) {
@@ -132,49 +162,20 @@ namespace Terraria.ModLoader.UI
 			Main.menuMode = _gotoMenu;
 		}
 
-		private void ExtractClick(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(ID.SoundID.MenuOpen);
-			Interface.extractMod.Show(_localMod, _gotoMenu);
-		}
-
 		private void DeleteClick(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(ID.SoundID.MenuClose);
+			Main.PlaySound(SoundID.MenuClose);
 			File.Delete(_localMod.modFile.path);
 			Main.menuMode = _gotoMenu;
+		}
+
+		private void ExtractClick(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(SoundID.MenuOpen);
+			Interface.extractMod.Show(_localMod, _gotoMenu);
 		}
 
 		private void VisitModHomePage(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10);
 			Process.Start(_url);
-		}
-
-		public override void Draw(SpriteBatch spriteBatch) {
-			base.Draw(spriteBatch);
-			UILinkPointNavigator.Shortcuts.BackButtonCommand = 100;
-			UILinkPointNavigator.Shortcuts.BackButtonGoto = _gotoMenu;
-			if (modHomepageButton.IsMouseHovering) {
-				UICommon.DrawHoverStringInBounds(spriteBatch, _url);
-			}
-		}
-
-		public override void OnActivate() {
-			uITextPanel.SetText(Language.GetTextValue("tModLoader.ModInfoHeader") + _modDisplayName, 0.8f, true);
-			modInfo.SetText(_info);
-			if (_url.Equals("")) {
-				modHomepageButton.Remove();
-			}
-			else {
-				uIElement.Append(modHomepageButton);
-			}
-
-			if (_localMod != null) {
-				uIElement.AddOrRemoveChild(deleteButton, ModLoader.Mods.All(x => x.Name != _localMod.Name));
-				uIElement.Append(extractButton);
-			}
-			else {
-				deleteButton.Remove();
-				extractButton.Remove();
-			}
 		}
 	}
 }

@@ -1,9 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Newtonsoft.Json;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using Terraria.GameContent.UI.Elements;
 using Terraria.GameContent.UI.States;
 using Terraria.Localization;
@@ -18,8 +18,53 @@ namespace Terraria.ModLoader.UI
 		internal static string[] mods;
 
 		private UIList _modListList;
-		private UILoaderAnimatedImage _uiLoader;
 		private UIPanel _scrollPanel;
+		private UILoaderAnimatedImage _uiLoader;
+
+		public override void Draw(SpriteBatch spriteBatch) {
+			base.Draw(spriteBatch);
+			UILinkPointNavigator.Shortcuts.BackButtonCommand = 100;
+			UILinkPointNavigator.Shortcuts.BackButtonGoto = Interface.modsMenuID;
+		}
+
+		public override void OnActivate() {
+			_scrollPanel.Append(_uiLoader);
+			_modListList.Clear();
+			Task.Factory
+				.StartNew(delegate {
+					mods = ModOrganizer.FindMods().Select(m => m.Name).ToArray();
+					return FindModLists();
+				})
+				.ContinueWith(task => {
+					string[] modListsFullPath = task.Result;
+					foreach (string modListFilePath in modListsFullPath) {
+						try {
+							string[] mods = { };
+							//string path = ModListSaveDirectory + Path.DirectorySeparatorChar + modListFilePath + ".json";
+
+							if (File.Exists(modListFilePath)) {
+								using (StreamReader r = new StreamReader(modListFilePath)) {
+									string json = r.ReadToEnd();
+
+									mods = JsonConvert.DeserializeObject<string[]>(json);
+								}
+							}
+
+							UIModPackItem modItem = new UIModPackItem(Path.GetFileNameWithoutExtension(modListFilePath), mods);
+							_modListList.Add(modItem);
+						}
+						catch {
+							var badModPackMessage = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPackMalformed", Path.GetFileName(modListFilePath))) {
+								Width = { Percent = 1 },
+								Height = { Pixels = 50, Percent = 0 }
+							};
+							_modListList.Add(badModPackMessage);
+						}
+					}
+
+					_scrollPanel.RemoveChild(_uiLoader);
+				}, TaskScheduler.FromCurrentSynchronizationContext());
+		}
 
 		public override void OnInitialize() {
 			var uIElement = new UIElement {
@@ -80,13 +125,6 @@ namespace Terraria.ModLoader.UI
 			Append(uIElement);
 		}
 
-		private static void SaveNewModList(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(11, -1, -1, 1);
-			Main.MenuUI.SetState(new UIVirtualKeyboard(Language.GetTextValue("tModLoader.ModPacksEnterModPackName"), "", new UIVirtualKeyboard.KeyboardSubmitEvent(SaveModList), () => Main.menuMode = Interface.modPacksMenuID,
-													   0));
-			Main.menuMode = 888;
-		}
-
 		public static void SaveModList(string filename) {
 			// TODO
 			//Main.menuMode = Interface.modsMenuID;
@@ -107,56 +145,18 @@ namespace Terraria.ModLoader.UI
 			Main.menuMode = Interface.modsMenuID;
 		}
 
-		public override void Draw(SpriteBatch spriteBatch) {
-			base.Draw(spriteBatch);
-			UILinkPointNavigator.Shortcuts.BackButtonCommand = 100;
-			UILinkPointNavigator.Shortcuts.BackButtonGoto = Interface.modsMenuID;
-		}
-
-		public override void OnActivate() {
-			_scrollPanel.Append(_uiLoader);
-			_modListList.Clear();
-			Task.Factory
-				.StartNew(delegate {
-					mods = ModOrganizer.FindMods().Select(m => m.Name).ToArray();
-					return FindModLists();
-				})
-				.ContinueWith(task => {
-					string[] modListsFullPath = task.Result;
-					foreach (string modListFilePath in modListsFullPath) {
-						try {
-							string[] mods = { };
-							//string path = ModListSaveDirectory + Path.DirectorySeparatorChar + modListFilePath + ".json";
-
-							if (File.Exists(modListFilePath)) {
-								using (StreamReader r = new StreamReader(modListFilePath)) {
-									string json = r.ReadToEnd();
-
-									mods = JsonConvert.DeserializeObject<string[]>(json);
-								}
-							}
-
-							UIModPackItem modItem = new UIModPackItem(Path.GetFileNameWithoutExtension(modListFilePath), mods);
-							_modListList.Add(modItem);
-						}
-						catch {
-							var badModPackMessage = new UIScalingTextPanel<string>(Language.GetTextValue("tModLoader.ModPackMalformed", Path.GetFileName(modListFilePath))) {
-								Width = { Percent = 1 },
-								Height = { Pixels = 50, Percent = 0 }
-							};
-							_modListList.Add(badModPackMessage);
-						}
-					}
-
-					_scrollPanel.RemoveChild(_uiLoader);
-				}, TaskScheduler.FromCurrentSynchronizationContext());
-		}
-
 		private string[] FindModLists() {
 			Directory.CreateDirectory(ModListSaveDirectory);
 			string[] files = Directory.GetFiles(ModListSaveDirectory, "*.json", SearchOption.TopDirectoryOnly);
 			//string[] files = Directory.GetFiles(ModListSaveDirectory, "*.json", SearchOption.TopDirectoryOnly).Select(file => Path.GetFileNameWithoutExtension(file)).ToArray();
 			return files;
+		}
+
+		private static void SaveNewModList(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(11, -1, -1, 1);
+			Main.MenuUI.SetState(new UIVirtualKeyboard(Language.GetTextValue("tModLoader.ModPacksEnterModPackName"), "", SaveModList, () => Main.menuMode = Interface.modPacksMenuID,
+													   0));
+			Main.menuMode = 888;
 		}
 	}
 }

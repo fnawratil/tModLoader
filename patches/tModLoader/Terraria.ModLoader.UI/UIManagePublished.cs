@@ -1,11 +1,13 @@
-using Microsoft.Xna.Framework.Graphics;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Specialized;
 using System.Net;
+using System.Text;
+using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json.Linq;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 using Terraria.UI.Gamepad;
 
@@ -16,6 +18,60 @@ namespace Terraria.ModLoader.UI
 		public UITextPanel<string> textPanel;
 
 		private UIList _myPublishedMods;
+
+		public override void Draw(SpriteBatch spriteBatch) {
+			base.Draw(spriteBatch);
+			UILinkPointNavigator.Shortcuts.BackButtonCommand = 100;
+			UILinkPointNavigator.Shortcuts.BackButtonGoto = Interface.modSourcesID;
+		}
+
+		public override void OnActivate() {
+			_myPublishedMods.Clear();
+			textPanel.SetText(Language.GetTextValue("tModLoader.MBMyPublishedMods"), 0.8f, true);
+			string response = "";
+			try {
+				ServicePointManager.Expect100Continue = false;
+				const string url = "http://javid.ddns.net/tModLoader/listmymods.php";
+				var values = new NameValueCollection {
+					{ "steamid64", ModLoader.SteamID64 },
+					{ "modloaderversion", ModLoader.versionedName },
+					{ "passphrase", ModLoader.modBrowserPassphrase }
+				};
+				byte[] result = UploadFile.UploadFiles(url, null, values);
+				response = Encoding.UTF8.GetString(result);
+			}
+			catch (WebException e) {
+				if (e.Status == WebExceptionStatus.Timeout) {
+					textPanel.SetText(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", Language.GetTextValue("tModLoader.MBBusy")), 0.8f, true);
+					return;
+				}
+
+				textPanel.SetText(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", ""), 0.8f, true);
+				return;
+			}
+			catch (Exception e) {
+				UIModBrowser.LogModBrowserException(e);
+				return;
+			}
+
+			try {
+				var a = JArray.Parse(response);
+
+				foreach (JObject o in a.Children<JObject>()) {
+					var modItem = new UIModManageItem((string)o["displayname"],
+													  (string)o["name"],
+													  (string)o["version"],
+													  (string)o["author"],
+													  (string)o["downloads"],
+													  (string)o["downloadsversion"],
+													  (string)o["modloaderversion"]);
+					_myPublishedMods.Add(modItem);
+				}
+			}
+			catch (Exception e) {
+				UIModBrowser.LogModBrowserException(e);
+			}
+		}
 
 		public override void OnInitialize() {
 			var area = new UIElement {
@@ -69,60 +125,6 @@ namespace Terraria.ModLoader.UI
 		private static void BackClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(SoundID.MenuClose);
 			Main.menuMode = Interface.modSourcesID;
-		}
-
-		public override void Draw(SpriteBatch spriteBatch) {
-			base.Draw(spriteBatch);
-			UILinkPointNavigator.Shortcuts.BackButtonCommand = 100;
-			UILinkPointNavigator.Shortcuts.BackButtonGoto = Interface.modSourcesID;
-		}
-
-		public override void OnActivate() {
-			_myPublishedMods.Clear();
-			textPanel.SetText(Language.GetTextValue("tModLoader.MBMyPublishedMods"), 0.8f, true);
-			string response = "";
-			try {
-				ServicePointManager.Expect100Continue = false;
-				const string url = "http://javid.ddns.net/tModLoader/listmymods.php";
-				var values = new NameValueCollection {
-					{ "steamid64", ModLoader.SteamID64 },
-					{ "modloaderversion", ModLoader.versionedName },
-					{ "passphrase", ModLoader.modBrowserPassphrase },
-				};
-				byte[] result = IO.UploadFile.UploadFiles(url, null, values);
-				response = System.Text.Encoding.UTF8.GetString(result);
-			}
-			catch (WebException e) {
-				if (e.Status == WebExceptionStatus.Timeout) {
-					textPanel.SetText(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", Language.GetTextValue("tModLoader.MBBusy")), 0.8f, true);
-					return;
-				}
-
-				textPanel.SetText(Language.GetTextValue("tModLoader.MenuModBrowser") + " " + Language.GetTextValue("tModLoader.MBOfflineWithReason", ""), 0.8f, true);
-				return;
-			}
-			catch (Exception e) {
-				UIModBrowser.LogModBrowserException(e);
-				return;
-			}
-
-			try {
-				var a = JArray.Parse(response);
-
-				foreach (JObject o in a.Children<JObject>()) {
-					var modItem = new UIModManageItem((string)o["displayname"],
-													  (string)o["name"],
-													  (string)o["version"],
-													  (string)o["author"],
-													  (string)o["downloads"],
-													  (string)o["downloadsversion"],
-													  (string)o["modloaderversion"]);
-					_myPublishedMods.Add(modItem);
-				}
-			}
-			catch (Exception e) {
-				UIModBrowser.LogModBrowserException(e);
-			}
 		}
 	}
 }

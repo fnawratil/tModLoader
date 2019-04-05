@@ -1,12 +1,14 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Graphics;
 using Terraria.Localization;
@@ -18,10 +20,10 @@ namespace Terraria.ModLoader.UI
 	//TODO common 'Item' code
 	internal class UIModSourceItem : UIPanel
 	{
-		private readonly string _mod;
-		private readonly Texture2D _dividerTexture;
-		private readonly UIText _modName;
 		private readonly LocalMod _builtMod;
+		private readonly Texture2D _dividerTexture;
+		private readonly string _mod;
+		private readonly UIText _modName;
 
 		public UIModSourceItem(string mod, LocalMod builtMod) {
 			_mod = mod;
@@ -72,27 +74,6 @@ namespace Terraria.ModLoader.UI
 			OnDoubleClick += BuildAndReload;
 		}
 
-		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			base.DrawSelf(spriteBatch);
-			CalculatedStyle innerDimensions = GetInnerDimensions();
-			Vector2 drawPos = new Vector2(innerDimensions.X + 5f, innerDimensions.Y + 30f);
-			spriteBatch.Draw(_dividerTexture, drawPos, null, Color.White,
-							 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f) / 8f, 1f), SpriteEffects.None,
-							 0f);
-		}
-
-		public override void MouseOver(UIMouseEvent evt) {
-			base.MouseOver(evt);
-			BackgroundColor = UICommon.UI_BLUE_COLOR;
-			BorderColor = new Color(89, 116, 213);
-		}
-
-		public override void MouseOut(UIMouseEvent evt) {
-			base.MouseOut(evt);
-			BackgroundColor = new Color(63, 82, 151) * 0.7f;
-			BorderColor = new Color(89, 116, 213) * 0.7f;
-		}
-
 		public override int CompareTo(object obj) {
 			UIModSourceItem uIModSourceItem = obj as UIModSourceItem;
 			if (uIModSourceItem == null) {
@@ -108,18 +89,39 @@ namespace Terraria.ModLoader.UI
 			return uIModSourceItem._builtMod.lastModified.CompareTo(_builtMod.lastModified);
 		}
 
-		private void BuildMod(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(10, -1, -1, 1);
-			ModLoader.modToBuild = _mod;
-			ModLoader.reloadAfterBuild = false;
-			ModLoader.buildAll = false;
-			Main.menuMode = Interface.buildModID;
+		public override void MouseOut(UIMouseEvent evt) {
+			base.MouseOut(evt);
+			BackgroundColor = new Color(63, 82, 151) * 0.7f;
+			BorderColor = new Color(89, 116, 213) * 0.7f;
+		}
+
+		public override void MouseOver(UIMouseEvent evt) {
+			base.MouseOver(evt);
+			BackgroundColor = UICommon.UI_BLUE_COLOR;
+			BorderColor = new Color(89, 116, 213);
+		}
+
+		protected override void DrawSelf(SpriteBatch spriteBatch) {
+			base.DrawSelf(spriteBatch);
+			CalculatedStyle innerDimensions = GetInnerDimensions();
+			Vector2 drawPos = new Vector2(innerDimensions.X + 5f, innerDimensions.Y + 30f);
+			spriteBatch.Draw(_dividerTexture, drawPos, null, Color.White,
+							 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f) / 8f, 1f), SpriteEffects.None,
+							 0f);
 		}
 
 		private void BuildAndReload(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(10, -1, -1, 1);
 			ModLoader.modToBuild = _mod;
 			ModLoader.reloadAfterBuild = true;
+			ModLoader.buildAll = false;
+			Main.menuMode = Interface.buildModID;
+		}
+
+		private void BuildMod(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(10, -1, -1, 1);
+			ModLoader.modToBuild = _mod;
+			ModLoader.reloadAfterBuild = false;
 			ModLoader.buildAll = false;
 			Main.menuMode = Interface.buildModID;
 		}
@@ -166,13 +168,13 @@ namespace Terraria.ModLoader.UI
 					{ "steamid64", ModLoader.SteamID64 },
 					{ "modloaderversion", "tModLoader v" + modFile.tModLoaderVersion },
 					{ "passphrase", ModLoader.modBrowserPassphrase },
-					{ "modreferences", String.Join(", ", bp.modReferences.Select(x => x.mod)) },
-					{ "modside", bp.side.ToFriendlyString() },
+					{ "modreferences", string.Join(", ", bp.modReferences.Select(x => x.mod)) },
+					{ "modside", bp.side.ToFriendlyString() }
 				};
 				if (values["steamid64"].Length != 17)
 					throw new WebException($"The steamid64 '{values["steamid64"]}' is invalid, verify that you are logged into Steam and don't have a pirated copy of Terraria.");
 				if (string.IsNullOrEmpty(values["author"]))
-					throw new WebException($"You need to specify an author in build.txt");
+					throw new WebException("You need to specify an author in build.txt");
 				ServicePointManager.Expect100Continue = false;
 				string url = "http://javid.ddns.net/tModLoader/publishmod.php";
 				using (PatientWebClient client = new PatientWebClient()) {
@@ -185,7 +187,7 @@ namespace Terraria.ModLoader.UI
 					client.UploadProgressChanged += (s, e) => Interface.uploadMod.SetProgress(e);
 					client.UploadDataCompleted += (s, e) => PublishUploadDataComplete(s, e, modFile);
 
-					var boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", System.Globalization.NumberFormatInfo.InvariantInfo);
+					var boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", NumberFormatInfo.InvariantInfo);
 					client.Headers["Content-Type"] = "multipart/form-data; boundary=" + boundary;
 					//boundary = "--" + boundary;
 					byte[] data = UploadFile.GetUploadFilesRequestData(files, values);
@@ -234,7 +236,7 @@ namespace Terraria.ModLoader.UI
 		{
 			protected override WebRequest GetWebRequest(Uri uri) {
 				HttpWebRequest w = (HttpWebRequest)base.GetWebRequest(uri);
-				w.Timeout = System.Threading.Timeout.Infinite;
+				w.Timeout = Timeout.Infinite;
 				w.AllowWriteStreamBuffering = false; // Should use less ram.
 				return w;
 			}

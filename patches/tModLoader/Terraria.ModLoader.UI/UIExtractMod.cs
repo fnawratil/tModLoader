@@ -13,22 +13,10 @@ namespace Terraria.ModLoader.UI
 	internal class UIExtractMod : UIState
 	{
 		private static readonly IList<string> CodeExtensions = new List<string>(ModCompile.sourceExtensions) { ".dll", ".pdb" };
+		private int _gotoMenu;
 
 		private UILoadProgress _loadProgress;
-		private int _gotoMenu;
 		private LocalMod _mod;
-
-		public override void OnInitialize() {
-			_loadProgress = new UILoadProgress {
-				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MAX_PANEL_WIDTH,
-				Height = { Pixels = 150 },
-				HAlign = 0.5f,
-				VAlign = 0.5f,
-				Top = { Pixels = 10 }
-			};
-			Append(_loadProgress);
-		}
 
 		public override void OnActivate() {
 			Main.menuMode = Interface.extractModID;
@@ -47,6 +35,18 @@ namespace Terraria.ModLoader.UI
 							  CancellationToken.None,
 							  TaskContinuationOptions.OnlyOnRanToCompletion,
 							  TaskScheduler.FromCurrentSynchronizationContext());
+		}
+
+		public override void OnInitialize() {
+			_loadProgress = new UILoadProgress {
+				Width = { Percent = 0.8f },
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
+				Height = { Pixels = 150 },
+				HAlign = 0.5f,
+				VAlign = 0.5f,
+				Top = { Pixels = 10 }
+			};
+			Append(_loadProgress);
 		}
 
 		internal void Show(LocalMod mod, int gotoMenu) {

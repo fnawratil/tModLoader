@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -14,33 +15,13 @@ namespace Terraria.ModLoader.UI
 	//TODO: merge all progress/download UIs
 	internal class UIDownloadMods : UIState
 	{
-		private UILoadProgress _loadProgress;
-		private string _name;
-		private Action _cancelAction;
-		private readonly Queue<UIModDownloadItem> _modsToDownload = new Queue<UIModDownloadItem>();
 		private readonly List<string> _missingMods = new List<string>();
+		private readonly Queue<UIModDownloadItem> _modsToDownload = new Queue<UIModDownloadItem>();
+		private Action _cancelAction;
 		private WebClient _client;
 		private UIModDownloadItem _currentDownload;
-
-		public override void OnInitialize() {
-			_loadProgress = new UILoadProgress {
-				Width = { Percent = 0.8f },
-				MaxWidth = UICommon.MAX_PANEL_WIDTH,
-				Height = { Pixels = 150 },
-				HAlign = 0.5f,
-				VAlign = 0.5f,
-				Top = { Pixels = 10 }
-			};
-			Append(_loadProgress);
-
-			var cancel = new UITextPanel<string>(Language.GetTextValue("UI.Cancel"), 0.75f, true) {
-				VAlign = 0.5f,
-				HAlign = 0.5f,
-				Top = { Pixels = 170 }
-			}.WithFadedMouseOver();
-			cancel.OnClick += CancelClick;
-			Append(cancel);
-		}
+		private UILoadProgress _loadProgress;
+		private string _name;
 
 		public override void OnActivate() {
 			_loadProgress.SetText(Language.GetTextValue("tModLoader.MBDownloadingMod", _name + ": ???"));
@@ -69,13 +50,72 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
+		public override void OnInitialize() {
+			_loadProgress = new UILoadProgress {
+				Width = { Percent = 0.8f },
+				MaxWidth = UICommon.MAX_PANEL_WIDTH,
+				Height = { Pixels = 150 },
+				HAlign = 0.5f,
+				VAlign = 0.5f,
+				Top = { Pixels = 10 }
+			};
+			Append(_loadProgress);
+
+			var cancel = new UITextPanel<string>(Language.GetTextValue("UI.Cancel"), 0.75f, true) {
+				VAlign = 0.5f,
+				HAlign = 0.5f,
+				Top = { Pixels = 170 }
+			}.WithFadedMouseOver();
+			cancel.OnClick += CancelClick;
+			Append(cancel);
+		}
+
+		public void SetCancel(Action cancelAction) {
+			_cancelAction = cancelAction;
+		}
+
+		internal void SetDownloading(string name) {
+			_name = name;
+		}
+
+		internal void SetModsToDownload(List<string> specialModPackFilter, List<UIModDownloadItem> items) {
+			_modsToDownload.Clear();
+			_missingMods.Clear();
+			foreach (var desiredMod in specialModPackFilter) {
+				var mod = items.FirstOrDefault(x => x.mod == desiredMod);
+				if (mod == null) {
+					_missingMods.Add(desiredMod);
+				}
+				else {
+					if (mod.installed != null && !mod.update) {
+						// skip mods that are already installed and don't have an update
+					}
+					else {
+						_modsToDownload.Enqueue(mod);
+					}
+				}
+			}
+		}
+
+		internal void SetProgress(DownloadProgressChangedEventArgs e) => SetProgress(e.BytesReceived, e.TotalBytesToReceive);
+
+		internal void SetProgress(long count, long len) {
+			//loadProgress?.SetText("Downloading: " + name + " -- " + count+"/" + len);
+			_loadProgress?.SetProgress((float)count / len);
+		}
+
+		private void CancelClick(UIMouseEvent evt, UIElement listeningElement) {
+			Main.PlaySound(SoundID.MenuOpen);
+			_cancelAction?.Invoke();
+		}
+
 		//public override void Update(GameTime gameTime)
 		//{
 		//	if (modsToDownload == null || modsToDownload.Count == 0)
 		//		Main.menuMode = Interface.modBrowserID;
 		//}
 
-		private void Client_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e) {
+		private void Client_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e) {
 			//Main.menuMode = Interface.modBrowserID;
 			if (e.Error != null) {
 				if (e.Cancelled) {
@@ -135,45 +175,6 @@ namespace Terraria.ModLoader.UI
 
 		private void Client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e) {
 			SetProgress(e);
-		}
-
-		internal void SetDownloading(string name) {
-			_name = name;
-		}
-
-		public void SetCancel(Action cancelAction) {
-			_cancelAction = cancelAction;
-		}
-
-		internal void SetProgress(DownloadProgressChangedEventArgs e) => SetProgress(e.BytesReceived, e.TotalBytesToReceive);
-
-		internal void SetProgress(long count, long len) {
-			//loadProgress?.SetText("Downloading: " + name + " -- " + count+"/" + len);
-			_loadProgress?.SetProgress((float)count / len);
-		}
-
-		private void CancelClick(UIMouseEvent evt, UIElement listeningElement) {
-			Main.PlaySound(SoundID.MenuOpen);
-			_cancelAction?.Invoke();
-		}
-
-		internal void SetModsToDownload(List<string> specialModPackFilter, List<UIModDownloadItem> items) {
-			_modsToDownload.Clear();
-			_missingMods.Clear();
-			foreach (var desiredMod in specialModPackFilter) {
-				var mod = items.FirstOrDefault(x => x.mod == desiredMod);
-				if (mod == null) {
-					_missingMods.Add(desiredMod);
-				}
-				else {
-					if (mod.installed != null && !mod.update) {
-						// skip mods that are already installed and don't have an update
-					}
-					else {
-						_modsToDownload.Enqueue(mod);
-					}
-				}
-			}
 		}
 
 		private HttpStatusCode GetHttpStatusCode(Exception err) {

@@ -1,8 +1,9 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Specialized;
 using System.Net;
+using System.Text;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Graphics;
 using Terraria.Localization;
@@ -14,10 +15,10 @@ namespace Terraria.ModLoader.UI
 	//TODO common 'Item' code
 	internal class UIModManageItem : UIPanel
 	{
-		public string name;
-		public string displayname;
-		public string version;
 		public string author;
+		public string displayname;
+		public string name;
+		public string version;
 
 		private readonly Texture2D _dividerTexture;
 		private readonly UIText _modName;
@@ -61,13 +62,10 @@ namespace Terraria.ModLoader.UI
 			Append(_unpublishButton);
 		}
 
-		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			base.DrawSelf(spriteBatch);
-			CalculatedStyle innerDimensions = GetInnerDimensions();
-			var drawPos = new Vector2(innerDimensions.X + 5f, innerDimensions.Y + 30f);
-			spriteBatch.Draw(_dividerTexture, drawPos, null, Color.White,
-							 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f) / 8f, 1f), SpriteEffects.None,
-							 0f);
+		public override void MouseOut(UIMouseEvent evt) {
+			base.MouseOut(evt);
+			BackgroundColor = new Color(63, 82, 151) * 0.7f;
+			BorderColor = new Color(89, 116, 213) * 0.7f;
 		}
 
 		public override void MouseOver(UIMouseEvent evt) {
@@ -76,10 +74,13 @@ namespace Terraria.ModLoader.UI
 			BorderColor = new Color(89, 116, 213);
 		}
 
-		public override void MouseOut(UIMouseEvent evt) {
-			base.MouseOut(evt);
-			BackgroundColor = new Color(63, 82, 151) * 0.7f;
-			BorderColor = new Color(89, 116, 213) * 0.7f;
+		protected override void DrawSelf(SpriteBatch spriteBatch) {
+			base.DrawSelf(spriteBatch);
+			CalculatedStyle innerDimensions = GetInnerDimensions();
+			var drawPos = new Vector2(innerDimensions.X + 5f, innerDimensions.Y + 30f);
+			spriteBatch.Draw(_dividerTexture, drawPos, null, Color.White,
+							 0f, Vector2.Zero, new Vector2((innerDimensions.Width - 10f) / 8f, 1f), SpriteEffects.None,
+							 0f);
 		}
 
 		internal void Unpublish(UIMouseEvent evt, UIElement listeningElement) {
@@ -97,10 +98,10 @@ namespace Terraria.ModLoader.UI
 					{ "name", name },
 					{ "steamid64", ModLoader.SteamID64 },
 					{ "modloaderversion", ModLoader.versionedName },
-					{ "passphrase", ModLoader.modBrowserPassphrase },
+					{ "passphrase", ModLoader.modBrowserPassphrase }
 				};
 				byte[] result = UploadFile.UploadFiles(url, null, values);
-				string s = System.Text.Encoding.UTF8.GetString(result, 0, result.Length);
+				string s = Encoding.UTF8.GetString(result, 0, result.Length);
 				UIModBrowser.LogModUnpublishInfo(s);
 			}
 			catch (Exception e) {

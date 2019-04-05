@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
-using System;
-using System.Collections.Generic;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
@@ -11,11 +11,11 @@ namespace Terraria.ModLoader.UI
 	internal class UIMessageBox : UIPanel
 	{
 		protected UIScrollbar scrollbar;
-
-		private string _text;
+		private readonly List<Tuple<string, float>> _drawTexts = new List<Tuple<string, float>>();
 		private float _height;
 		private bool _heightNeedsRecalculating;
-		private readonly List<Tuple<string, float>> _drawTexts = new List<Tuple<string, float>>();
+
+		private string _text;
 
 		public UIMessageBox(string text) {
 			_text = text;
@@ -30,32 +30,9 @@ namespace Terraria.ModLoader.UI
 			_heightNeedsRecalculating = true;
 		}
 
-		internal void SetText(string text) {
-			_text = text;
-			if (scrollbar != null) {
-				scrollbar.ViewPosition = 0;
-				_heightNeedsRecalculating = true;
-			}
-		}
-
-		protected override void DrawSelf(SpriteBatch spriteBatch) {
-			base.DrawSelf(spriteBatch);
-			CalculatedStyle space = GetInnerDimensions();
-			float position = 0f;
-			if (scrollbar != null) {
-				position = -scrollbar.GetValue();
-			}
-
-			foreach (var drawText in _drawTexts) {
-				if (position + drawText.Item2 > space.Height)
-					break;
-				if (position >= 0)
-					Utils.DrawBorderString(spriteBatch, drawText.Item1, new Vector2(space.X, space.Y + position), Color.White,
-										   1f);
-				position += drawText.Item2;
-			}
-
-			Recalculate();
+		public override void Recalculate() {
+			base.Recalculate();
+			UpdateScrollbar();
 		}
 
 		public override void RecalculateChildren() {
@@ -100,11 +77,6 @@ namespace Terraria.ModLoader.UI
 			_heightNeedsRecalculating = false;
 		}
 
-		public override void Recalculate() {
-			base.Recalculate();
-			UpdateScrollbar();
-		}
-
 		public override void ScrollWheel(UIScrollWheelEvent evt) {
 			base.ScrollWheel(evt);
 			if (scrollbar != null) {
@@ -112,10 +84,38 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
+		protected override void DrawSelf(SpriteBatch spriteBatch) {
+			base.DrawSelf(spriteBatch);
+			CalculatedStyle space = GetInnerDimensions();
+			float position = 0f;
+			if (scrollbar != null) {
+				position = -scrollbar.GetValue();
+			}
+
+			foreach (var drawText in _drawTexts) {
+				if (position + drawText.Item2 > space.Height)
+					break;
+				if (position >= 0)
+					Utils.DrawBorderString(spriteBatch, drawText.Item1, new Vector2(space.X, space.Y + position), Color.White,
+										   1f);
+				position += drawText.Item2;
+			}
+
+			Recalculate();
+		}
+
 		public void SetScrollbar(UIScrollbar scrollbar) {
 			this.scrollbar = scrollbar;
 			UpdateScrollbar();
 			_heightNeedsRecalculating = true;
+		}
+
+		internal void SetText(string text) {
+			_text = text;
+			if (scrollbar != null) {
+				scrollbar.ViewPosition = 0;
+				_heightNeedsRecalculating = true;
+			}
 		}
 
 		private void UpdateScrollbar() {

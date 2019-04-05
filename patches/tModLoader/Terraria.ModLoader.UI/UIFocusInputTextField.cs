@@ -1,35 +1,24 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria.GameInput;
 using Terraria.UI;
 
 namespace Terraria.ModLoader.UI
 {
 	internal class UIFocusInputTextField : UIElement
 	{
-		internal bool focused;
+		public delegate void EventHandler(object sender, EventArgs e);
+
 		internal string currentString = "";
+		internal bool focused;
 
 		private readonly string _hintText;
 		private int _textBlinkerCount;
 		private int _textBlinkerState;
 
-		public delegate void EventHandler(object sender, EventArgs e);
-
-		public event EventHandler OnTextChange;
-		public event EventHandler OnUnfocus;
-
 		public UIFocusInputTextField(string hintText) {
 			_hintText = hintText;
-		}
-
-		public void SetText(string text) {
-			if (text == null)
-				text = "";
-			if (currentString != text) {
-				currentString = text;
-				OnTextChange?.Invoke(this, new EventArgs());
-			}
 		}
 
 		public override void Click(UIMouseEvent evt) {
@@ -53,7 +42,7 @@ namespace Terraria.ModLoader.UI
 			//Main.spriteBatch.Draw(Main.magicPixel, hitbox, Color.Red * 0.6f);
 
 			if (focused) {
-				GameInput.PlayerInput.WritingText = true;
+				PlayerInput.WritingText = true;
 				Main.instance.HandleIME();
 				string newString = Main.GetInputText(currentString);
 				if (!newString.Equals(currentString)) {
@@ -83,6 +72,18 @@ namespace Terraria.ModLoader.UI
 			else {
 				Utils.DrawBorderString(spriteBatch, displayString, new Vector2(space.X, space.Y), Color.White,
 									   1f);
+			}
+		}
+
+		public event EventHandler OnTextChange;
+		public event EventHandler OnUnfocus;
+
+		public void SetText(string text) {
+			if (text == null)
+				text = "";
+			if (currentString != text) {
+				currentString = text;
+				OnTextChange?.Invoke(this, new EventArgs());
 			}
 		}
 	}
