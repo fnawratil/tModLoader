@@ -1,8 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 
@@ -15,32 +15,12 @@ namespace Terraria.ModLoader.UI.Elements
 
 		public List<UIElement> items = new List<UIElement>();
 		public float ListPadding = 5f;
-		public int Count => items.Count;
 
 		protected UIScrollbar scrollbar;
 
 		internal UIElement innerList = new UIInnerList();
 
 		private float _innerListHeight;
-
-		private class UIInnerList : UIElement
-		{
-			public override bool ContainsPoint(Vector2 point) {
-				return true;
-			}
-
-			protected override void DrawChildren(SpriteBatch spriteBatch) {
-				Vector2 position = Parent.GetDimensions().Position();
-				Vector2 dimensions = new Vector2(Parent.GetDimensions().Width, Parent.GetDimensions().Height);
-				foreach (UIElement current in Elements) {
-					Vector2 position2 = current.GetDimensions().Position();
-					Vector2 dimensions2 = new Vector2(current.GetDimensions().Width, current.GetDimensions().Height);
-					if (Collision.CheckAABBvAABBCollision(position, dimensions, position2, dimensions2)) {
-						current.Draw(spriteBatch);
-					}
-				}
-			}
-		}
 
 		// todo, vertical/horizontal orientation, left to right, etc?
 		public UIGrid() {
@@ -50,6 +30,8 @@ namespace Terraria.ModLoader.UI.Elements
 			OverflowHidden = true;
 			Append(innerList);
 		}
+
+		public int Count => items.Count;
 
 		public float GetTotalHeight() {
 			return _innerListHeight;
@@ -102,7 +84,7 @@ namespace Terraria.ModLoader.UI.Elements
 		public override void ScrollWheel(UIScrollWheelEvent evt) {
 			base.ScrollWheel(evt);
 			if (scrollbar != null) {
-				scrollbar.ViewPosition -= (float)evt.ScrollWheelValue;
+				scrollbar.ViewPosition -= evt.ScrollWheelValue;
 			}
 		}
 
@@ -128,10 +110,6 @@ namespace Terraria.ModLoader.UI.Elements
 			}
 
 			_innerListHeight = top + maxRowHeight;
-		}
-
-		private void UpdateScrollbar() {
-			scrollbar?.SetView(GetInnerDimensions().Height, _innerListHeight);
 		}
 
 		public void SetScrollbar(UIScrollbar scrollbar) {
@@ -166,16 +144,37 @@ namespace Terraria.ModLoader.UI.Elements
 				innerList.Top.Set(-scrollbar.GetValue(), 0f);
 			}
 		}
+
+		private void UpdateScrollbar() {
+			scrollbar?.SetView(GetInnerDimensions().Height, _innerListHeight);
+		}
+
+		private class UIInnerList : UIElement
+		{
+			public override bool ContainsPoint(Vector2 point) {
+				return true;
+			}
+
+			protected override void DrawChildren(SpriteBatch spriteBatch) {
+				Vector2 position = Parent.GetDimensions().Position();
+				Vector2 dimensions = new Vector2(Parent.GetDimensions().Width, Parent.GetDimensions().Height);
+				foreach (UIElement current in Elements) {
+					Vector2 position2 = current.GetDimensions().Position();
+					Vector2 dimensions2 = new Vector2(current.GetDimensions().Width, current.GetDimensions().Height);
+					if (Collision.CheckAABBvAABBCollision(position, dimensions, position2, dimensions2)) {
+						current.Draw(spriteBatch);
+					}
+				}
+			}
+		}
 	}
 
 	internal class NestedUIGrid : UIGrid
 	{
-		public NestedUIGrid() { }
-
 		public override void ScrollWheel(UIScrollWheelEvent evt) {
 			if (scrollbar != null) {
 				float oldpos = scrollbar.ViewPosition;
-				scrollbar.ViewPosition -= (float)evt.ScrollWheelValue;
+				scrollbar.ViewPosition -= evt.ScrollWheelValue;
 				if (oldpos == scrollbar.ViewPosition) {
 					base.ScrollWheel(evt);
 				}
