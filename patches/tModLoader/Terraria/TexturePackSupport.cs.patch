@@ -1,10 +1,11 @@
 --- src/Terraria\Terraria\TexturePackSupport.cs
 +++ src/tModLoader\Terraria\TexturePackSupport.cs
-@@ -5,6 +_,7 @@
+@@ -5,6 +_,8 @@
  using System.Collections.Generic;
  using System.Diagnostics;
  using System.IO;
 +using System.Linq;
++using System.Text;
  
  namespace Terraria
  {
@@ -25,7 +26,7 @@
  		public static void FindTexturePack()
  		{
  			string savePath = Main.SavePath;
-@@ -61,5 +_,33 @@
+@@ -61,5 +_,43 @@
  				TexturePackSupport.entries.Add(current.FileName.Replace("/", "\\"), current);
  			}
  		}
@@ -35,6 +36,7 @@
 +		public static void FindTexturePacks()
 +		{
 +			string texturePacksPath = Path.Combine(Main.SavePath, "TexturePacks");
++			bool reloadNeeded = false;
 +			if (Enabled)
 +			{
 +				Directory.CreateDirectory(texturePacksPath);
@@ -48,11 +50,20 @@
 +				files.Sort();
 +				foreach (string fileName in files)
 +				{
-+					ZipFile zipFile = ZipFile.Read(File.OpenRead(fileName));
-+					TexturePackSupport.texturePacks.Add(zipFile);
-+					foreach (ZipEntry current in zipFile.Entries)
++					FileStream fs = File.OpenRead(fileName);
++
++					using (ZipFile file = new ZipFile(fileName, Encoding.UTF8))
 +					{
-+						TexturePackSupport.entries.Add(current.FileName.Replace("/", "\\"), current);
++						TexturePackSupport.texturePacks.Add(file);
++						foreach (ZipEntry current in file.Entries)
++						{
++							if (TexturePackSupport.entries.ContainsKey(current.FileName.Replace("/", "\\")))
++							{
++								TexturePackSupport.entries[current.FileName.Replace("/", "\\")] = current;
++								continue;
++							}
++							TexturePackSupport.entries.Add(current.FileName.Replace("/", "\\"), current);
++						}
 +					}
 +				}
 +			}

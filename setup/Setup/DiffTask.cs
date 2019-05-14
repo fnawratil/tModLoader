@@ -124,7 +124,7 @@ namespace Terraria.ModLoader.Setup
 		{
 			var output = new StringBuilder();
 			Program.RunCmd(Program.toolsDir, Path.Combine(Program.toolsDir, "py.exe"),
-				$"diff.py {baseFile} {srcFile} {baseName} {srcName}",
+				$@"diff.py ""{baseFile}"" ""{srcFile}"" ""{baseName}"" ""{srcName}""",
 				s => output.Append(s));
 
 			return output.ToString();

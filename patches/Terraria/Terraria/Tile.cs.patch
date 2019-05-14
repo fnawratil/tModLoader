@@ -1,6 +1,6 @@
 --- src/merged\Terraria\Tile.cs
 +++ src/Terraria\Terraria\Tile.cs
-@@ -296,7 +_,7 @@
+@@ -294,7 +_,7 @@
  
  		public byte wallColor()
  		{
@@ -9,7 +9,7 @@
  		}
  
  		public void wallColor(byte wallColor)
-@@ -305,7 +_,7 @@
+@@ -303,7 +_,7 @@
  			{
  				wallColor = 30;
  			}
@@ -18,7 +18,7 @@
  		}
  
  		public bool lava()
-@@ -317,7 +_,7 @@
+@@ -315,7 +_,7 @@
  		{
  			if (lava)
  			{
@@ -27,7 +27,7 @@
  				return;
  			}
  			this.bTileHeader &= 223;
-@@ -332,7 +_,7 @@
+@@ -330,7 +_,7 @@
  		{
  			if (honey)
  			{
